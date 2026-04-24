@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>NLP Engineering Handbook - Deep Edition</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body {
+    background-color: #020617;
+    color: #e2e8f0;
+    font-family: "Georgia", serif;
+    line-height: 2.1;
+}
+
+/* Container spacing */
+.container {
+    max-width: 900px;
+}
+
+/* Titles */
+.chapter-title {
+    font-size: 3rem;
+    border-bottom: 2px solid #334155;
+    margin-bottom: 30px;
+}
+
+.section-title {
+    margin-top: 70px;
+    margin-bottom: 20px;
+    color: #60a5fa;
+}
+
+/* Sub sections */
+.sub {
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+/* Code block FIX */
+.code-box {
+    background: #000;
+    padding: 18px;
+    border-left: 4px solid #22c55e;
+    margin: 25px 0;
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+
+    /* CRITICAL FIXES */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    line-height: 1.6;
+    border-radius: 6px;
+}
+
+/* Example box */
+.example-box {
+    background: #1e293b;
+    padding: 18px;
+    border-left: 4px solid #38bdf8;
+    margin: 25px 0;
+    border-radius: 6px;
+}
+
+/* Insight box */
+.insight-box {
+    background: #111827;
+    padding: 18px;
+    border-left: 4px solid #facc15;
+    margin-top: 25px;
+    border-radius: 6px;
+}
+
+/* Paragraph spacing */
+p {
+    margin-bottom: 15px;
+}
+
+/* List spacing */
+ul {
+    margin-bottom: 15px;
+    padding-left: 20px;
+}
+</style>
+</head>
+<body class="p-5 bg-dark text-light">
+<div class="container">
+
+<h1 class="chapter-title">📘 NLP Engineering Handbook</h1>
+
+<p>
+Natural Language Processing (NLP) is a critical domain of artificial intelligence that focuses on enabling machines to understand, interpret, and manipulate human language. Unlike structured data, human language is inherently ambiguous, context-dependent, and highly dynamic. NLP bridges the gap between human communication and machine understanding by transforming textual data into structured representations that machines can process. This handbook is designed to provide a deep engineering perspective of NLP, covering foundational techniques, linguistic processing, statistical methods, and neural architectures. The goal is not just to use NLP tools, but to understand their internal mechanics, trade-offs, and real-world applicability in designing scalable and efficient systems.
+</p>
+
+<hr>
+
+<!-- ================= TEXT PREPROCESSING ================= -->
+
+<h2 class="section-title">1. Text Preprocessing</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Text preprocessing is the foundational stage of any NLP pipeline, where raw textual data is cleaned and normalized before further processing. Real-world text data is often noisy and contains punctuation, HTML tags, emojis, inconsistent casing, and irrelevant symbols that can negatively impact model performance. Preprocessing ensures that the input data is standardized, making it easier for models to extract meaningful patterns. It reduces vocabulary size, eliminates redundancy, and improves computational efficiency. Without preprocessing, models may learn incorrect or misleading relationships, leading to poor generalization. Therefore, preprocessing is not just a cleaning step—it is a crucial transformation stage that directly influences the effectiveness of downstream NLP tasks.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Removes noise and inconsistencies</li>
+<li>Standardizes input text</li>
+<li>Improves model accuracy</li>
+<li>Reduces computational complexity</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Before any NLP pipeline</li>
+<li>Working with raw text data</li>
+<li>Text classification, sentiment analysis</li>
+</ul>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import re
+
+text = "Hello!!! NLP is AMAZING :)"
+clean_text = re.sub(r'[^a-zA-Z ]', '', text).lower()
+
+print(clean_text)
+</pre>
+
+<hr>
+
+<!-- ================= TOKENIZATION ================= -->
+
+<h2 class="section-title">2. Tokenization</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Tokenization is the process of splitting text into smaller meaningful units called tokens. These tokens can be words, characters, or subwords depending on the task. Since machine learning models cannot process raw text directly, tokenization converts text into structured inputs. It plays a crucial role in defining vocabulary, sequence length, and computational efficiency. Poor tokenization can lead to information loss or increased complexity. Modern NLP systems often use subword tokenization to handle unknown words and reduce vocabulary size. Thus, tokenization is a key design decision that directly affects model performance and scalability.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Converts text into machine-readable units</li>
+<li>Defines vocabulary space</li>
+<li>Improves processing efficiency</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Before feature extraction</li>
+<li>In all NLP pipelines</li>
+</ul>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from nltk.tokenize import word_tokenize
+
+text = "NLP is powerful"
+tokens = word_tokenize(text)
+
+print(tokens)
+</pre>
+
+<hr>
+
+<!-- ================= STEMMING ================= -->
+
+<h2 class="section-title">3. Stemming</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Stemming is a normalization technique used to reduce words to their root form by removing suffixes and prefixes. It is a rule-based heuristic approach that does not consider linguistic correctness, often producing non-dictionary words. Despite its limitations, stemming is computationally efficient and widely used in search engines and information retrieval systems. By reducing variations of a word to a common base, it helps improve matching and reduces vocabulary size. However, it may distort meaning, making it less suitable for tasks requiring semantic accuracy.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Reduces vocabulary size</li>
+<li>Improves search matching</li>
+<li>Enhances efficiency</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Search engines</li>
+<li>Information retrieval systems</li>
+</ul>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from nltk.stem import PorterStemmer
+
+stemmer = PorterStemmer()
+words = ["running", "runner", "runs"]
+
+print([stemmer.stem(w) for w in words])
+</pre>
+
+<hr>
+
+<!-- ================= LEMMATIZATION ================= -->
+
+<h2 class="section-title">4. Lemmatization</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Lemmatization reduces words to their base or dictionary form by considering context and grammar. Unlike stemming, it produces meaningful words and uses linguistic rules and vocabulary databases. It relies on part-of-speech tagging to determine the correct base form. Lemmatization is more accurate but computationally expensive. It is widely used in applications requiring semantic understanding, such as chatbots and translation systems.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Improves semantic accuracy</li>
+<li>Produces meaningful base words</li>
+<li>Better than stemming</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Semantic NLP tasks</li>
+<li>High-accuracy systems</li>
+</ul>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import spacy
+
+nlp = spacy.load("en_core_web_sm")
+doc = nlp("running better cars")
+
+print([token.lemma_ for token in doc])
+</pre>
+
+<hr>
+
+<!-- ================= BAG OF WORDS ================= -->
+
+<h2 class="section-title">5. Bag of Words</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Bag of Words is a simple technique that converts text into numerical vectors based on word frequency. It ignores word order but captures occurrence information. Each document is represented as a vector of word counts, making it easy to implement and interpret. However, it lacks contextual understanding.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Simple representation</li>
+<li>Baseline models</li>
+<li>Easy to implement</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Text classification</li>
+<li>Baseline systems</li>
+</ul>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from sklearn.feature_extraction.text import CountVectorizer
+
+docs = ["NLP is fun", "NLP is powerful"]
+
+vectorizer = CountVectorizer()
+X = vectorizer.fit_transform(docs)
+
+print(X.toarray())
+</pre>
+
+<hr>
+
+<!-- ================= TF-IDF ================= -->
+
+<h2 class="section-title">6. TF-IDF</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+TF-IDF evaluates word importance based on frequency in a document relative to corpus frequency. It reduces the weight of common words and highlights rare but meaningful terms. It is widely used in search engines and document ranking.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Highlights important words</li>
+<li>Reduces noise</li>
+<li>Improves ranking</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Search engines</li>
+<li>Document similarity</li>
+</ul>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+docs = ["AI is powerful", "AI is everywhere"]
+
+tfidf = TfidfVectorizer()
+X = tfidf.fit_transform(docs)
+
+print(X.toarray())
+</pre>
+
+<hr>
+
+<!-- ================= WORD2VEC ================= -->
+
+<h2 class="section-title">7. Word2Vec</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Word2Vec generates dense vector embeddings capturing semantic relationships between words. It uses CBOW and Skip-Gram architectures to learn contextual relationships. It allows models to understand similarity and analogies.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Captures semantic similarity</li>
+<li>Dense vector representation</li>
+<li>Improves deep learning models</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Embedding tasks</li>
+<li>Clustering</li>
+</ul>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from gensim.models import Word2Vec
+
+sentences = [["king","queen"],["man","woman"]]
+
+model = Word2Vec(sentences, vector_size=50, min_count=1)
+
+print(model.wv.most_similar("king"))
+</pre>
+
+<hr>
+
+<!-- ================= POS ================= -->
+
+<h2 class="section-title">8. POS Tagging</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+POS tagging assigns grammatical roles to words, helping in syntactic understanding of sentences.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Grammar understanding</li>
+<li>Improves parsing</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Syntax analysis</li>
+</ul>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import nltk
+
+text = "AI is transforming industries"
+tokens = nltk.word_tokenize(text)
+
+print(nltk.pos_tag(tokens))
+</pre>
+
+<hr>
+
+<!-- ================= NER ================= -->
+
+<h2 class="section-title">9. Named Entity Recognition</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+NER identifies entities like names, locations, and organizations in text.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Extracts structured info</li>
+<li>Improves search</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Information extraction</li>
+</ul>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import spacy
+
+nlp = spacy.load("en_core_web_sm")
+doc = nlp("Google is in California")
+
+for ent in doc.ents:
+    print(ent.text, ent.label_)
+</pre>
+
+<hr>
+
+<!-- ================= RNN ================= -->
+
+<h2 class="section-title">10. RNN</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+RNNs process sequential data by maintaining hidden states across time steps.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Handles sequences</li>
+<li>Captures dependencies</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Text sequences</li>
+</ul>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import SimpleRNN, Dense
+
+model = Sequential([
+    SimpleRNN(10, input_shape=(3,1)),
+    Dense(1)
+])
+</pre>
+
+<hr>
+
+<!-- ================= LSTM ================= -->
+
+<h2 class="section-title">11. LSTM</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+LSTM improves RNN by handling long-term dependencies using gates.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Handles long sequences</li>
+<li>Avoids vanishing gradients</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Long text tasks</li>
+</ul>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from tensorflow.keras.layers import LSTM
+
+model = Sequential([
+    LSTM(50, input_shape=(3,1)),
+    Dense(1)
+])
+</pre>
+
+<hr>
+
+<!-- ================= EVALUATION ================= -->
+
+<h2 class="section-title">12. Evaluation Metrics</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Evaluation metrics assess model performance using measures like precision, recall, and F1-score.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Measure performance</li>
+<li>Compare models</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>After model training</li>
+</ul>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from sklearn.metrics import f1_score
+
+print(f1_score([1,0,1], [1,0,0]))
+</pre>
+
+<hr>
+
+</div>
+</body>
+
+</html>
