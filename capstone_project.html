@@ -7,64 +7,72 @@
 <link rel="stylesheet" href="./asset/css/style.css">
 </head>
 
-<body class="p-5">
-<!-- ===================================================== -->
-<!-- PRODUCTION LLM PROJECT (UPGRADED) -->
-<!-- ===================================================== -->
+<body>
 
-<h2 class="chapter-title">🚀 LLM Project (RAG + API + Streaming)</h2>
+<div class="container py-5">
 
+<!-- ================= HERO ================= -->
+<div class="hero">
+    <h1>🚀 Capstone LLM Project</h1>
+    <p>Build a Production System using RAG + API + Streaming</p>
+</div>
+
+<!-- ================= CHAPTER ================= -->
+<h2 class="chapter-title">Production LLM System</h2>
+
+<!-- ================= OVERVIEW ================= -->
 <h3 class="section-title">Project Overview</h3>
 
-<h4>📖 Introduction</h4>
+<h4 class="sub">📖 Introduction</h4>
 <p>
 In this project, we build a complete production-grade LLM system that simulates real-world AI applications such as ChatGPT, enterprise copilots, and knowledge assistants. Unlike simple prototypes, this system integrates multiple layers including retrieval pipelines, caching, API services, and streaming responses. The goal is to design a system that is not only accurate but also scalable, efficient, and cost-optimized. By combining Retrieval-Augmented Generation (RAG) with LLMs, we ensure that responses are grounded in real data instead of relying purely on pre-trained knowledge. This project helps you understand how modern AI systems are engineered and deployed in production environments.
-</p><br>
+</p>
 
-<h4>❓ What We Are Building</h4>
+<h4 class="sub">❓ What We Are Building</h4>
 <ul>
 <li>End-to-end LLM system</li>
 <li>RAG-based intelligent chatbot</li>
 <li>Production-ready backend API</li>
 <li>Streaming response system</li>
-</ul><br>
+</ul>
 
-<h4>❓ Why We Need It</h4>
+<h4 class="sub">❓ Why We Need It</h4>
 <ul>
 <li>LLMs hallucinate without external knowledge</li>
 <li>Real systems need low latency and scalability</li>
 <li>Enterprise AI requires structured pipelines</li>
-</ul><br>
+</ul>
 
-<h4>📌 When We Use This System</h4>
+<h4 class="sub">📌 When We Use This System</h4>
 <ul>
 <li>Customer support automation</li>
 <li>Enterprise knowledge assistants</li>
 <li>Search and Q&A systems</li>
-</ul><br>
+</ul>
 
-<h4>🎯 What This Will Create</h4>
+<h4 class="sub">🎯 What This Will Create</h4>
 <div class="example-box">
 User → API → Retrieval → Context → LLM → Streaming → Response
 </div>
 
-
+<!-- ================= ARCHITECTURE ================= -->
 <h3 class="section-title">System Architecture</h3>
-<img src="./asset/img/Project-System-Architecture.png">
 
+<img src="./asset/img/Project-System-Architecture.png">
 
 <div class="example-box">
 Client → FastAPI → RAG Pipeline → Vector DB → Cache → LLM → Streaming → Response
 </div>
 
+<!-- ================= STEP 1 ================= -->
 <h3 class="section-title">Step 1: Project Structure</h3>
 
-<h4>📖 What We Are Doing</h4>
+<h4 class="sub">📖 What We Are Doing</h4>
 <p>
 We organize the system into modular components. This separation ensures maintainability, scalability, and easier debugging.
 </p>
 
-<h4>❓ Why</h4>
+<h4 class="sub">❓ Why</h4>
 <ul>
 <li>Improves code readability</li>
 <li>Enables scaling of individual components</li>
@@ -81,21 +89,21 @@ project/
 │── config.py     # Configuration
 </pre>
 
-
+<!-- ================= STEP 2 ================= -->
 <h3 class="section-title">Step 2: Embeddings Layer</h3>
 
-<h4>📖 What We Are Doing</h4>
+<h4 class="sub">📖 What We Are Doing</h4>
 <p>
 We convert text into vector embeddings so that machines can understand semantic similarity instead of exact keyword matching.
 </p>
 
-<h4>❓ Why</h4>
+<h4 class="sub">❓ Why</h4>
 <ul>
 <li>Enables semantic search</li>
 <li>Improves retrieval accuracy</li>
 </ul>
 
-<h4>🌍 Real-Life Example</h4>
+<h4 class="sub">🌍 Real-Life Example</h4>
 <div class="example-box">
 "AI" and "Artificial Intelligence" → different words but similar meaning → embeddings capture this
 </div>
@@ -109,21 +117,21 @@ def embed(text):
     return model.encode([text])
 </pre>
 
-
+<!-- ================= STEP 3 ================= -->
 <h3 class="section-title">Step 3: Vector Database</h3>
 
-<h4>📖 What We Are Doing</h4>
+<h4 class="sub">📖 What We Are Doing</h4>
 <p>
 We store embeddings in a vector database and perform similarity search to find relevant documents.
 </p>
 
-<h4>❓ Why</h4>
+<h4 class="sub">❓ Why</h4>
 <ul>
 <li>Fast retrieval</li>
 <li>Scalable search</li>
 </ul>
 
-<h4>📌 When</h4>
+<h4 class="sub">📌 When</h4>
 <ul>
 <li>Large datasets</li>
 <li>Search systems</li>
@@ -142,15 +150,15 @@ def search(query_vec):
     return index.search(query_vec, k=2)
 </pre>
 
-
+<!-- ================= STEP 4 ================= -->
 <h3 class="section-title">Step 4: Retrieval Layer</h3>
 
-<h4>📖 What We Are Doing</h4>
+<h4 class="sub">📖 What We Are Doing</h4>
 <p>
 We retrieve the most relevant documents based on user query.
 </p>
 
-<h4>❓ Why</h4>
+<h4 class="sub">❓ Why</h4>
 <ul>
 <li>Provides context to LLM</li>
 <li>Improves factual accuracy</li>
@@ -165,21 +173,21 @@ def retrieve(query):
     return [documents[i] for i in I[0]]
 </pre>
 
-
+<!-- ================= STEP 5 ================= -->
 <h3 class="section-title">Step 5: Caching Layer</h3>
 
-<h4>📖 What We Are Doing</h4>
+<h4 class="sub">📖 What We Are Doing</h4>
 <p>
 We store previously generated responses to avoid recomputation.
 </p>
 
-<h4>❓ Why</h4>
+<h4 class="sub">❓ Why</h4>
 <ul>
 <li>Reduces latency</li>
 <li>Saves cost</li>
 </ul>
 
-<h4>🌍 Real-Life Example</h4>
+<h4 class="sub">🌍 Real-Life Example</h4>
 <div class="example-box">
 Same query repeated → served instantly from cache
 </div>
@@ -194,15 +202,15 @@ def set_cache(q, res):
     cache[q] = res
 </pre>
 
-
+<!-- ================= STEP 6 ================= -->
 <h3 class="section-title">Step 6: LLM Generation</h3>
 
-<h4>📖 What We Are Doing</h4>
+<h4 class="sub">📖 What We Are Doing</h4>
 <p>
 We generate the final response using the LLM based on retrieved context.
 </p>
 
-<h4>❓ Why</h4>
+<h4 class="sub">❓ Why</h4>
 <ul>
 <li>Combines reasoning + knowledge</li>
 <li>Produces human-like responses</li>
@@ -218,10 +226,10 @@ def generate(query, context):
     return generator(prompt, max_length=50)[0]['generated_text']
 </pre>
 
-
+<!-- ================= STEP 7 ================= -->
 <h3 class="section-title">Step 7: RAG Pipeline</h3>
 
-<h4>📖 What We Are Doing</h4>
+<h4 class="sub">📖 What We Are Doing</h4>
 <p>
 We integrate retrieval, generation, and caching into a unified pipeline.
 </p>
@@ -239,11 +247,10 @@ def rag(query):
     return response
 </pre>
 
-
-
+<!-- ================= STEP 8 ================= -->
 <h3 class="section-title">Step 8: API Layer</h3>
 
-<h4>📖 What We Are Doing</h4>
+<h4 class="sub">📖 What We Are Doing</h4>
 <p>
 We expose the system as an API so it can be accessed by applications.
 </p>
@@ -258,10 +265,10 @@ def query(q: str):
     return {"response": rag(q)}
 </pre>
 
-
+<!-- ================= STEP 9 ================= -->
 <h3 class="section-title">Step 9: Streaming</h3>
 
-<h4>📖 What We Are Doing</h4>
+<h4 class="sub">📖 What We Are Doing</h4>
 <p>
 We stream responses token-by-token for better user experience.
 </p>
@@ -272,10 +279,10 @@ def stream(text):
         yield word + " "
 </pre>
 
-
+<!-- ================= STEP 10 ================= -->
 <h3 class="section-title">Step 10: Async Optimization</h3>
 
-<h4>📖 What We Are Doing</h4>
+<h4 class="sub">📖 What We Are Doing</h4>
 <p>
 We use asynchronous execution to improve performance and handle multiple requests.
 </p>
@@ -291,19 +298,15 @@ async def pipeline(q):
     return generate(q, context)
 </pre>
 
-
+<!-- ================= OUTPUT ================= -->
 <h3 class="section-title">Final Output</h3>
 
 <div class="example-box">
-Input: "Explain AI"
-
-<br><br>
-
-Output:
-"AI is intelligence demonstrated by machines..."
+Input: "Explain AI"  
+Output: "AI is intelligence demonstrated by machines..."
 </div>
 
-
+<!-- ================= SUMMARY ================= -->
 <h3 class="section-title">🚀 What You Built</h3>
 
 <ul>
@@ -313,14 +316,15 @@ Output:
 <li>Scalable architecture foundation</li>
 </ul>
 
-
 <div class="insight-box">
 This system represents the core architecture used in modern AI platforms like ChatGPT and enterprise copilots.
 </div>
 
 <!-- ================= CTA ================= -->
 <div class="start-btn">
-    <button onclick="openPage('index.html')">Home Page →</button>
+    <button onclick="openPage('index.html')">⬅ Back to Home</button>
+</div>
+
 </div>
 
 <script>
@@ -328,5 +332,6 @@ function openPage(page){
     window.location.href = page;
 }
 </script>
+
 </body>
 </html>
