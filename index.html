@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Learning Platform</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="./asset/css/style.css">
+
+</head>
+
+<body>
+
+<div class="container py-5">
+
+<!-- ================= HERO ================= -->
+<div class="hero">
+    <h1>🚀 GenAI Engineering Handbook</h1>
+    <p>Learn NLP → Transformers → LLM → RAG → Agents → Production Systems</p>
+</div>
+
+<!-- ================= CARDS ================= -->
+<div class="row g-3 g-md-4">
+
+<div class="col-12 col-sm-6 col-lg-4">
+<div class="card nlp" onclick="openPage('nlp.html')">
+<h3>📘 NLP Foundations</h3>
+<p>Text processing, tokenization, embeddings</p>
+</div>
+</div>
+
+<div class="col-12 col-sm-6 col-lg-4">
+<div class="card transformer" onclick="openPage('transformer.html')">
+<h3>🔥 Transformers</h3>
+<p>Attention, architecture, BERT, GPT</p>
+</div>
+</div>
+
+<div class="col-12 col-sm-6 col-lg-4">
+<div class="card llm" onclick="openPage('llm.html')">
+<h3>🤖 LLM Engineering</h3>
+<p>Tokenization, KV cache, inference</p>
+</div>
+</div>
+
+<div class="col-12 col-sm-6 col-lg-4">
+<div class="card rag" onclick="openPage('rag.html')">
+<h3>🔍 RAG Systems</h3>
+<p>Retrieval pipelines, hybrid search</p>
+</div>
+</div>
+
+<div class="col-12 col-sm-6 col-lg-4">
+<div class="card agent" onclick="openPage('agent.html')">
+<h3>🧩 Agentic AI</h3>
+<p>Agents, tools, workflows</p>
+</div>
+</div>
+
+<div class="col-12 col-sm-6 col-lg-4">
+<div class="card project" onclick="openPage('capstone_project.html')">
+<h3>🚀 Capstone Project</h3>
+<p>Build production LLM system</p>
+</div>
+</div>
+
+</div>
+
+<!-- ================= CTA ================= -->
+<div class="start-btn">
+    <button onclick="openPage('nlp.html')">Start Learning →</button>
+</div>
+
+</div>
+
+<script>
+function openPage(page){
+    window.location.href = page;
+}
+</script>
+
+</body>
+</html>

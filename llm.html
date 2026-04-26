@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Enterprise LLM Architecture Handbook</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="./asset/css/style.css">
+</head>
+
+<body class="p-5">
+<div class="container">
+
+<h1 class="chapter-title">LLM Architecture Handbook</h1>
+<img src="./asset/img/llm.png"><br><br>
+
+<p>
+Large Language Models (LLMs) have evolved from experimental AI systems into critical enterprise infrastructure powering 
+applications such as copilots, chatbots, automation systems, and decision intelligence platforms. Unlike traditional machine 
+learning systems, LLMs require a deep integration of distributed computing, memory optimization, and probabilistic modeling. 
+At enterprise scale, challenges such as latency, throughput, cost efficiency, and reliability become dominant concerns. 
+Organizations must design systems that handle millions of requests while maintaining performance and correctness. This handbook 
+focuses strictly on LLM engineering at scale, covering core architecture, inference optimization, retrieval systems, and 
+production deployment strategies required to build robust enterprise-grade LLM applications.
+</p>
+
+<!-- ================= TOKENIZATION (UPGRADED LLM) ================= -->
+
+<h3 class="section-title">Tokenization</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+Tokenization in Large Language Models is not just a preprocessing step—it directly determines computational cost, latency, and model performance. LLMs do not process words but tokens, which are subword units generated using techniques like Byte Pair Encoding (BPE) or SentencePiece. Every input and output is measured in tokens, and pricing in most APIs is also based on token count. Efficient tokenization reduces sequence length while preserving meaning. Poor tokenization increases cost and memory usage, making systems inefficient. Therefore, tokenization is a critical design decision in enterprise LLM systems.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Controls cost (tokens = billing unit)</li>
+<li>Reduces sequence length</li>
+<li>Enables model compatibility</li>
+<li>Improves inference efficiency</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>All LLM pipelines</li>
+<li>Chatbots and APIs</li>
+<li>RAG systems</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Sentence: "ChatGPT is amazing"
+
+<br><br>
+
+Tokens:
+["Chat", "G", "PT", "is", "amazing"]
+
+<br><br>
+
+More tokens → Higher cost 💰
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/tokenization.png"><br><br>
+
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from transformers import GPT2Tokenizer
+
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+
+text = "Enterprise LLM systems"
+tokens = tokenizer.encode(text)
+
+print("Tokens:", tokens)
+print("Token Count:", len(tokens))
+</pre>
+
+<div class="insight-box">
+Token count = cost + latency → optimize prompts carefully.
+</div>
+
+<!-- ================= KV CACHE (UPGRADED) ================= -->
+
+<h3 class="section-title">KV Cache</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+KV Cache (Key-Value Cache) is the most important optimization technique in LLM inference. During text generation, transformers repeatedly compute attention over previous tokens, which becomes computationally expensive as the sequence grows. KV caching stores previously computed key and value matrices so they can be reused instead of recomputed. This reduces complexity from quadratic to linear and significantly improves performance. Without KV cache, real-time applications like chatbots would be too slow and costly to operate at scale.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Reduces computation from O(n²) to O(n)</li>
+<li>Speeds up generation</li>
+<li>Improves throughput</li>
+<li>Essential for real-time systems</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Autoregressive generation (GPT-like models)</li>
+<li>Chat applications</li>
+<li>Streaming inference systems</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Without Cache:
+Recompute attention for all tokens → slow ❌
+
+<br><br>
+
+With Cache:
+Reuse previous computations → fast ✅
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/kv-cache.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+Without Cache: O(n²)  
+With Cache: O(n)
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+kv_cache = {}
+
+def compute(token):
+    if token in kv_cache:
+        return kv_cache[token]
+    kv_cache[token] = token * 2
+    return kv_cache[token]
+
+print(compute(5))
+print(compute(5))  # Cached
+</pre>
+
+<div class="insight-box">
+KV Cache = reason why ChatGPT feels fast.
+</div>
+
+<!-- ================= vLLM (UPGRADED) ================= -->
+
+<h3 class="section-title">vLLM Serving Engine</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+vLLM is a high-performance inference engine designed specifically for serving large language models efficiently at scale. Traditional inference systems struggle with GPU memory fragmentation and inefficient batching, which reduces throughput. vLLM solves this using a technique called PagedAttention, which manages KV cache like virtual memory. This allows the system to serve thousands of concurrent requests efficiently. vLLM is widely used in production systems because it maximizes GPU utilization, reduces latency, and improves scalability for enterprise LLM deployments.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Handles high concurrency efficiently</li>
+<li>Optimizes GPU memory usage</li>
+<li>Improves throughput and latency</li>
+<li>Supports real-time LLM applications</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Enterprise LLM deployment</li>
+<li>High-traffic APIs</li>
+<li>Chatbots and copilots</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Without vLLM:
+100 users → GPU overload ❌
+
+<br><br>
+
+With vLLM:
+1000+ users → efficient batching ✅
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/vLLM.png"><br><br>
+
+
+<h4>💻 Command</h4>
+<pre class="code-box">
+python -m vllm.entrypoints.api_server --model llama
+</pre>
+
+<div class="insight-box">
+vLLM = backbone of high-throughput LLM serving.
+</div>
+
+<hr>
+
+
+<!-- ================= RAG ARCHITECTURE (UPGRADED) ================= -->
+
+<h3 class="section-title">RAG Architecture</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+Retrieval-Augmented Generation (RAG) is a system design pattern that combines retrieval systems with language models to improve accuracy and reduce hallucination. Instead of relying only on the model’s internal knowledge, RAG retrieves relevant documents from external sources such as databases or APIs and injects them into the prompt. This allows the model to generate responses based on up-to-date and factual information. RAG is widely used in enterprise applications like knowledge assistants, customer support bots, and search systems.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Reduces hallucination</li>
+<li>Provides real-time knowledge</li>
+<li>Improves factual accuracy</li>
+<li>Enables domain-specific AI systems</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Enterprise knowledge systems</li>
+<li>Customer support AI</li>
+<li>Document-based Q&A systems</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+User asks: "Company policy?"
+
+<br><br>
+
+RAG:
+→ Retrieve policy document  
+→ Inject into prompt  
+→ Generate accurate answer
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/RAG Architecture.png"><br><br>
+
+
+<h4>📐 Flow</h4>
+<div class="example-box">
+Query → Embed → Retrieve → Augment → Generate
+</div>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+docs = ["LLM = Large Language Model"]
+
+query = "What is LLM?"
+
+retrieved = docs[0]
+
+response = f"Answer based on doc: {retrieved}"
+
+print(response)
+</pre>
+
+<div class="insight-box">
+RAG = bridge between LLM and real-world data.
+</div>
+
+<!-- ================= MOE ================= -->
+
+<h3 class="section-title">Mixture of Experts</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Mixture of Experts (MoE) enables scaling to massive parameter sizes by activating only a subset of model components per token. 
+This reduces computational cost while maintaining high capacity. Enterprise systems use MoE to balance performance and cost 
+efficiency.
+</p>
+
+<h4 class="sub">📐 Formula</h4>
+<div class="example-box">
+Output = Σ gate(x) * expert(x)
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/MOE.png"><br><br>
+
+<!-- ================= LATENCY ================= -->
+
+<h3 class="section-title">Latency Optimization</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Latency is critical in enterprise applications such as chatbots and copilots. Optimizing latency involves reducing compute, 
+memory access time, and network delays. Techniques include KV caching, batching, quantization, and efficient serving engines.
+</p>
+
+<div class="example-box">
+Latency = Compute + Memory + Network
+</div>
+
+<!-- ================= SYSTEM DESIGN (UPGRADED) ================= -->
+
+<h3 class="section-title">Enterprise LLM System Design</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+Enterprise LLM systems are not just models—they are distributed systems designed to handle millions of requests with low latency and high reliability. A complete system includes user interfaces, API gateways, load balancers, inference engines, caching layers, and monitoring systems. Each layer must be optimized for scalability and fault tolerance. Designing such systems requires balancing performance, cost, and reliability. Modern architectures also integrate RAG pipelines and streaming inference for better user experience.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Handles large-scale traffic</li>
+<li>Ensures reliability and uptime</li>
+<li>Optimizes latency and cost</li>
+<li>Supports real-world applications</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Building production AI systems</li>
+<li>Deploying chatbots and copilots</li>
+<li>Enterprise SaaS platforms</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+ChatGPT System:
+
+<br><br>
+
+User → API → Load Balancer → LLM → Cache → Response
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/Enterprise-LLM.png"><br><br>
+
+
+<h4>📐 Architecture</h4>
+<div class="example-box">
+User → API Gateway → Load Balancer → vLLM → KV Cache → RAG → Response
+</div>
+
+<h4>💻 Python (API Example)</h4>
+<pre class="code-box">
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def run():
+    return {"response": "LLM Output"}
+</pre>
+
+<div class="insight-box">
+LLM systems = distributed systems + AI models.
+</div>
+
+
+
+<!-- ================= MULTI REGION LLM DEPLOYMENT (UPGRADED) ================= -->
+
+<h3 class="section-title">Multi-Region LLM Deployment</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+Multi-region deployment is a system design strategy where LLM services are distributed across multiple geographic locations to ensure low latency, high availability, and fault tolerance. Instead of relying on a single data center, requests are routed to the nearest available region using global load balancing. This reduces response time and ensures that the system remains operational even if one region fails. In large-scale applications like chatbots and AI assistants, downtime or high latency can severely impact user experience. Multi-region architecture solves this by providing redundancy and scalability. However, it introduces challenges such as data synchronization, model consistency, and infrastructure complexity, which must be carefully managed.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Ensures high availability (99.99% uptime)</li>
+<li>Reduces latency using geo-routing</li>
+<li>Provides disaster recovery</li>
+<li>Improves user experience globally</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Global AI applications</li>
+<li>Enterprise SaaS platforms</li>
+<li>High-traffic LLM APIs</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+User in India → Request goes to Mumbai server  
+
+<br><br>
+
+User in USA → Request goes to US-East server  
+
+<br><br>
+
+If US server fails → traffic shifts to Europe ✅
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/Multi-LLM.png"><br><br>
+
+
+<h4>📐 Architecture</h4>
+<div class="example-box">
+User → Global Load Balancer → Region A / Region B → LLM Cluster
+</div>
+
+<h4>💻 Python Example (Routing Logic)</h4>
+<pre class="code-box">
+regions = ["us-east", "eu-west", "ap-south"]
+
+def latency(user, region):
+    return abs(hash(user + region)) % 100  # simulated latency
+
+def route_request(user_location):
+    return min(regions, key=lambda r: latency(user_location, r))
+
+print(route_request("india-user"))
+</pre>
+
+<div class="insight-box">
+Multi-region = reliability layer for enterprise AI systems.
+</div>
+
+<!-- ================= GPU ORCHESTRATION (UPGRADED) ================= -->
+
+<h3 class="section-title">GPU Orchestration (Kubernetes)</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+GPU orchestration is the process of managing and distributing GPU resources efficiently across multiple workloads in large-scale LLM systems. Since LLMs require significant computational power, manually managing GPUs becomes inefficient and error-prone. Kubernetes provides a powerful orchestration layer that automates deployment, scaling, and resource allocation. It ensures that workloads are distributed across available GPU nodes, enabling better utilization and cost efficiency. Features like autoscaling allow the system to dynamically adjust resources based on demand, ensuring high performance during peak traffic and cost savings during low usage. This is critical for maintaining throughput and minimizing operational costs in enterprise AI systems.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Efficient GPU utilization</li>
+<li>Automatic scaling based on demand</li>
+<li>Reduces operational complexity</li>
+<li>Improves system reliability</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Large-scale LLM deployments</li>
+<li>High concurrency systems</li>
+<li>Cloud-based AI infrastructure</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Traffic spike → Kubernetes adds more GPU nodes  
+
+<br><br>
+
+Low traffic → unused GPUs are released → cost saved ✅
+</div>
+
+<h4>🖼️ Diagram</h4>
+
+<img src="./asset/img/GPU-Orchestration.png"><br><br>
+
+
+<h4>📐 Concept</h4>
+<div class="example-box">
+Pods → GPU Nodes → Cluster Autoscaler
+</div>
+
+<h4>💻 YAML Example</h4>
+<pre class="code-box">
+apiVersion: v1
+kind: Pod
+metadata:
+  name: llm-pod
+spec:
+  containers:
+  - name: llm
+    image: llm-model
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+</pre>
+
+<div class="insight-box">
+Kubernetes = operating system for LLM infrastructure.
+</div>
+
+<!-- ================= VECTOR DATABASE (UPGRADED) ================= -->
+
+<h3 class="section-title">Vector Database (RAG Core)</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+Vector databases are specialized systems designed to store and retrieve embeddings efficiently using similarity search. Instead of matching exact text, they compare numerical vectors that represent meaning. This allows fast retrieval of relevant documents in RAG systems. Vector databases use approximate nearest neighbor (ANN) algorithms to achieve millisecond-level search performance even on large datasets. They are critical for building real-time knowledge systems.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Enables semantic search</li>
+<li>Fast retrieval of relevant data</li>
+<li>Supports RAG systems</li>
+<li>Handles large-scale embeddings</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Search systems</li>
+<li>Knowledge assistants</li>
+<li>RAG pipelines</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Query: "What is AI?"
+
+<br><br>
+
+Vector DB retrieves:
+"AI is artificial intelligence..."
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/vector-database.png"><br><br>
+
+
+<h4>📐 Math</h4>
+<div class="example-box">
+Similarity = cosine(q, d)
+</div>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import numpy as np
+
+def cosine_similarity(a, b):
+    return np.dot(a,b)/(np.linalg.norm(a)*np.linalg.norm(b))
+
+print(cosine_similarity([1,2],[2,3]))
+</pre>
+
+<div class="insight-box">
+Vector DB = memory layer of LLM systems.
+</div>
+
+
+<!-- ================= STREAMING INFERENCE (UPGRADED) ================= -->
+
+<h3 class="section-title">Streaming Inference</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+Streaming inference allows LLMs to generate and send tokens one by one instead of waiting for the full response. This improves user experience by reducing perceived latency. Instead of waiting several seconds, users see output appearing instantly. Streaming is essential in chat systems and real-time applications. It also helps reduce timeouts and improves interactivity.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Improves user experience</li>
+<li>Reduces perceived latency</li>
+<li>Enables real-time interaction</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Chatbots</li>
+<li>Live AI systems</li>
+<li>Interactive applications</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Without Streaming:
+Wait 5 seconds ❌
+
+<br><br>
+
+With Streaming:
+"Hello..." → appears instantly ✅
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/Streaming-Inference.png"><br><br>
+
+
+<h4>📐 Concept</h4>
+<div class="example-box">
+Token₁ → Token₂ → Token₃ → Output
+</div>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+for token in ["Hello","world"]:
+    print(token, end=" ")
+</pre>
+
+<div class="insight-box">
+Streaming = UX optimization, not model optimization.
+</div>
+
+<!-- ================= PROMPT ENGINEERING ================= -->
+
+<h3 class="section-title">Prompt Engineering</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+Prompt engineering is the process of designing inputs to guide LLM behavior effectively. Since LLMs generate outputs based on input context, the quality of prompts directly impacts performance. A well-designed prompt can significantly improve accuracy, reduce hallucination, and control output format. Prompt engineering includes techniques such as zero-shot, few-shot learning, role prompting, and chain-of-thought reasoning. It is one of the most practical and powerful tools for working with LLMs.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Improves output quality</li>
+<li>Reduces hallucination</li>
+<li>Controls model behavior</li>
+<li>Enhances task performance</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>All LLM applications</li>
+<li>Chatbots</li>
+<li>Automation systems</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Bad Prompt:
+"Explain AI"
+
+<br><br>
+
+Good Prompt:
+"Explain AI in simple terms for a beginner in 3 lines"
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/prompt-engg.png"><br><br>
+
+
+<h4>💻 Python Example</h4>
+<pre class="code-box">
+prompt = "Explain AI in 3 lines"
+
+response = model.generate(prompt)
+
+print(response)
+</pre>
+
+<div class="insight-box">
+Prompt = programming language of LLMs.
+</div>
+
+<!-- ===================================================== -->
+<!-- OBSERVABILITY -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Observability & Monitoring</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Enterprise LLM systems require full observability to track performance, detect failures, and optimize cost. Metrics such as 
+latency, throughput, token usage, and error rates must be monitored in real time. Logging and tracing systems help debug issues 
+across distributed components. Without observability, scaling LLM systems becomes unreliable and expensive.
+</p>
+
+<h4 class="sub">📐 Metrics</h4>
+
+<div class="example-box">
+Latency, TPS, Token Usage, Error Rate
+</div>
+
+<h4 class="sub">💻 Example</h4>
+
+<pre class="code-box">
+import time
+
+start = time.time()
+response = model.generate("Hello")
+latency = time.time() - start
+
+print("Latency:", latency)
+</pre>
+
+
+<!-- ===================================================== -->
+<!-- COST ENGINEERING -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Cost Engineering</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Cost is one of the biggest challenges in enterprise LLM deployment. Since pricing is often proportional to token usage and model size, 
+inefficient systems can become extremely expensive. Techniques such as caching, prompt optimization, model distillation, and adaptive 
+routing are used to reduce cost while maintaining performance.
+</p>
+
+<h4 class="sub">📐 Formula</h4>
+
+<div class="example-box">
+Cost ∝ Tokens × Model Size × Requests
+</div>
+
+<h4 class="sub">💻 Example</h4>
+
+<pre class="code-box">
+tokens = 1000
+cost_per_token = 0.00001
+print(tokens * cost_per_token)
+</pre>
+
+
+<!-- ===================================================== -->
+<!-- SECURITY -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">LLM Security</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Security in LLM systems involves protecting against prompt injection, data leakage, and misuse. Since LLMs process user inputs 
+directly, they are vulnerable to adversarial prompts. Enterprise systems must implement input validation, output filtering, 
+and access control mechanisms to ensure safe operation.
+</p>
+
+<h4 class="sub">📐 Risk Model</h4>
+
+<div class="example-box">
+Input → Model → Output → Risk
+</div>
+
+
+<!-- ================= TOKEN SCHEDULER (UPGRADED) ================= -->
+
+<h3 class="section-title">Token Scheduling Engine</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+Token scheduling is a key optimization technique used in high-performance LLM systems. Instead of processing one request at a time, modern systems interleave token generation across multiple requests. This improves GPU utilization and throughput. The scheduler dynamically batches tokens from different sequences, ensuring efficient computation. Designing a scheduler requires balancing latency, fairness, and throughput, making it one of the most complex components in LLM infrastructure.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Improves GPU utilization</li>
+<li>Increases throughput</li>
+<li>Reduces idle compute</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>High-concurrency systems</li>
+<li>Enterprise LLM APIs</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Req1: A → B → C  
+Req2: X → Y → Z  
+
+<br><br>
+
+Scheduler:
+A,X → B,Y → C,Z
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/Token-Scheduling.png"><br><br>
+
+
+<h4>💻 Python Simulation</h4>
+<pre class="code-box">
+queue = [["A","B","C"], ["X","Y","Z"]]
+
+while any(queue):
+    batch = []
+    for seq in queue:
+        if seq:
+            batch.append(seq.pop(0))
+    print(batch)
+</pre>
+
+<div class="insight-box">
+Token scheduling = secret behind high throughput.
+</div>
+
+
+<!-- ================= INFERENCE ENGINE COMPARISON (UPGRADED) ================= -->
+
+<h3 class="section-title">Inference Engine Comparison</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+Inference engines are responsible for serving trained LLM models efficiently in production. Different engines are optimized for different goals such as throughput, latency, or flexibility. vLLM is designed for high-throughput serving using techniques like dynamic batching and paged KV cache. NVIDIA Triton is a general-purpose inference server that supports multiple frameworks and deployment patterns. TensorRT is highly optimized for low-latency inference but requires model conversion and tuning. Choosing the right engine depends on system requirements such as request volume, latency constraints, and hardware availability.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Optimizes model serving performance</li>
+<li>Improves latency and throughput</li>
+<li>Matches system requirements</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Deploying LLMs in production</li>
+<li>Building scalable APIs</li>
+<li>Optimizing inference performance</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Chatbot with many users → vLLM (throughput)  
+
+<br><br>
+
+Real-time trading system → TensorRT (low latency)  
+
+<br><br>
+
+Multi-model deployment → Triton (flexibility)
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/Inference-Engine.png"><br><br>
+
+
+<h4>📊 Comparison</h4>
+<div class="example-box">
+vLLM → High Throughput  
+Triton → Flexible Deployment  
+TensorRT → Low Latency
+</div>
+
+<div class="insight-box">
+Choosing the right engine = system performance optimization.
+</div>
+
+<!-- ================= ADVANCED BATCHING (UPGRADED) ================= -->
+
+<h3 class="section-title">Advanced Batching & Queueing</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+Advanced batching is a technique used to improve the efficiency of LLM inference systems by grouping multiple requests together. Instead of processing each request individually, systems combine them into batches to maximize GPU utilization. Queueing strategies determine how requests are ordered and processed. Techniques such as dynamic batching, priority queues, and time slicing ensure that both latency and throughput are optimized. Poor batching leads to wasted GPU resources or slow response times. Therefore, batching and queueing are critical for scaling LLM APIs efficiently.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Maximizes GPU utilization</li>
+<li>Improves throughput</li>
+<li>Balances latency and efficiency</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>High-traffic LLM systems</li>
+<li>API-based applications</li>
+<li>Real-time AI services</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+3 users send requests → grouped into 1 batch → processed together → faster ✅
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/Batching.png"><br><br>
+
+
+<h4>📐 Model</h4>
+<div class="example-box">
+Throughput = f(batch_size, latency)
+</div>
+
+<h4>💻 Python Example</h4>
+<pre class="code-box">
+from queue import Queue
+
+q = Queue()
+
+def add_request(req):
+    q.put(req)
+
+def process_batch():
+    batch = []
+    while not q.empty():
+        batch.append(q.get())
+    return batch
+
+print(process_batch())
+</pre>
+
+<div class="insight-box">
+Batching = trade-off between speed and latency.
+</div>
+
+<!-- ===================================================== -->
+<!-- MOE ROUTING -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">MoE Routing Mechanism</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+In Mixture of Experts models, routing determines which subset of experts will process a given token. This is typically implemented 
+using a gating network that outputs probabilities over experts. Only top-k experts are selected, reducing compute while maintaining 
+model capacity. Efficient routing is essential to avoid load imbalance across GPUs.
+</p>
+
+<h4 class="sub">📐 Formula</h4>
+
+<div class="example-box">
+Top-k Experts = argmax(gate(x))
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/MOE.png"><br><br>
+
+<!-- ================= END TO END LLM PIPELINE (UPGRADED) ================= -->
+
+<h3 class="section-title">End-to-End LLM Pipeline</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+An end-to-end LLM pipeline represents the complete system architecture required to serve AI applications at scale. It includes multiple layers such as user interface, API gateway, request scheduler, inference engine, caching layer, retrieval system, and monitoring tools. Each component must be optimized for performance, cost, and reliability. This pipeline ensures that user queries are processed efficiently and responses are generated accurately. Large-scale systems like ChatGPT use similar architectures to handle millions of users in real time.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Handles full AI workflow</li>
+<li>Ensures scalability and reliability</li>
+<li>Optimizes performance</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Building production AI systems</li>
+<li>Enterprise deployments</li>
+<li>Large-scale applications</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+User asks question → system retrieves data → LLM generates answer → response returned
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/LLM-Pipeline.png"><br><br>
+
+
+<h4>📐 Full Architecture</h4>
+<div class="example-box">
+User → CDN → API Gateway → Scheduler → LLM Engine → KV Cache → RAG → Output
+</div>
+
+<h4>💻 Python Example</h4>
+<pre class="code-box">
+def pipeline(query):
+    context = "retrieved knowledge"
+    response = "LLM output based on " + query + context
+    return response
+
+print(pipeline("What is AI?"))
+</pre>
+
+<div class="insight-box">
+LLM pipeline = combination of AI + distributed systems.
+</div>
+
+
+<!-- ===================================================== -->
+<!-- FINAL INSIGHT -->
+<!-- ===================================================== -->
+
+<div class="insight-box">
+At FAANG scale, LLM systems are not AI models — they are distributed operating systems for probabilistic computation.
+</div>
+
+</div>
+
+<!-- ================= CTA ================= -->
+<div class="start-btn">
+    <button onclick="openPage('index.html')">Home Page →</button>
+</div>
+
+<script>
+function openPage(page){
+    window.location.href = page;
+}
+</script>
+</body>
+</html>

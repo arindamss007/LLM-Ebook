@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ultimate Transformer Engineering Handbook</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="./asset/css/style.css">
+</head>
+
+<body class="p-5">
+<div class="container">
+
+<h1 class="chapter-title">Transformers</h1>
+
+<img src="./asset/img/Transformer.png">
+
+<p>
+Transformers represent one of the most significant breakthroughs in modern artificial intelligence. Unlike traditional 
+sequence models such as Recurrent Neural Networks (RNNs) and Long Short-Term Memory networks (LSTMs), transformers rely 
+entirely on attention mechanisms to process input data. This architectural shift enables parallel computation, improved 
+handling of long-range dependencies, and significantly better scalability. Transformers form the backbone of modern AI 
+systems including large language models, recommendation systems, and multimodal architectures. Understanding transformers 
+requires a combination of mathematical intuition, architectural clarity, and practical implementation knowledge, all of 
+which are covered in this engineering handbook.
+</p>
+
+<!-- ================= SELF ATTENTION (UPGRADED) ================= -->
+
+<h2 class="section-title">1. Self-Attention</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Self-attention is the core mechanism behind transformer models that allows each word in a sentence to understand its relationship with every other word. Unlike older models like RNNs that process words one by one, self-attention looks at the entire sentence at once. It assigns importance scores to words based on how relevant they are to each other. For example, in the sentence "The cat sat on the mat", the word "cat" is more related to "sat" than "mat". Self-attention captures such relationships efficiently. This ability to model global dependencies makes transformers powerful and scalable.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Captures relationships between all words in a sentence</li>
+<li>Handles long-range dependencies efficiently</li>
+<li>Enables parallel computation</li>
+<li>Improves contextual understanding</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Language models (GPT, BERT)</li>
+<li>Translation systems</li>
+<li>Text summarization</li>
+<li>Any sequence modeling task</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Sentence: "The animal didn't cross the street because it was tired"
+
+<br><br>
+
+Self-attention helps the model understand:
+"it" → refers to "animal" (not street)
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/self-attention.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+Attention(Q,K,V) = softmax(QKᵀ / √d_k) V
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import torch
+import torch.nn.functional as F
+
+def attention(Q, K, V):
+    d_k = Q.size(-1)
+    scores = torch.matmul(Q, K.transpose(-2, -1)) / (d_k ** 0.5)
+    weights = F.softmax(scores, dim=-1)
+    return torch.matmul(weights, V)
+
+Q = torch.rand(1,3,4)
+K = torch.rand(1,3,4)
+V = torch.rand(1,3,4)
+
+print(attention(Q,K,V))
+</pre>
+
+<div class="insight-box">
+Self-attention removes the sequential bottleneck of RNNs → foundation of Transformers.
+</div>
+
+
+<!-- ================= MULTI-HEAD ATTENTION (UPGRADED) ================= -->
+
+<h2 class="section-title">2. Multi-Head Attention</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Multi-head attention extends self-attention by allowing the model to focus on multiple relationships at the same time. Instead of computing a single attention score, the model splits the input into multiple parts called heads. Each head learns a different type of relationship, such as grammar, meaning, or position. These multiple perspectives are then combined to produce a richer representation. This makes the model more powerful and expressive. Multi-head attention is one of the key reasons transformers outperform traditional models in complex NLP tasks.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Captures multiple relationships simultaneously</li>
+<li>Improves model expressiveness</li>
+<li>Enhances contextual understanding</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Deep transformer models</li>
+<li>Language understanding tasks</li>
+<li>Vision transformers</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Sentence: "The bank near the river is flooded"
+
+<br><br>
+
+Different heads focus on:
+- "bank" → financial meaning  
+- "bank" → river side  
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/multi-head-attention.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+MultiHead(Q,K,V) = Concat(head₁,...,headₕ)Wᵒ
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import torch.nn as nn
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model, heads):
+        super().__init__()
+        self.q = nn.Linear(d_model, d_model)
+        self.k = nn.Linear(d_model, d_model)
+        self.v = nn.Linear(d_model, d_model)
+
+    def forward(self, x):
+        Q = self.q(x)
+        K = self.k(x)
+        V = self.v(x)
+        return Q @ K.transpose(-2,-1) @ V
+</pre>
+
+<div class="insight-box">
+Each head learns different linguistic patterns → richer understanding.
+</div>
+
+<!-- ================= POSITIONAL ENCODING (UPGRADED) ================= -->
+
+<h2 class="section-title">3. Positional Encoding</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Transformers process all words at the same time, which means they do not inherently understand the order of words in a sentence. However, word order is critical for meaning. Positional encoding solves this problem by adding information about the position of each word to its embedding. This allows the model to understand sequences while still benefiting from parallel computation. The original transformer uses sine and cosine functions to generate position values, ensuring smooth transitions across positions. This helps the model generalize to longer sequences and maintain structure in language.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Maintains word order information</li>
+<li>Enables sequence understanding</li>
+<li>Improves contextual accuracy</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>All transformer models</li>
+<li>Text and sequence tasks</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Sentence 1: "Dog bites man"  
+Sentence 2: "Man bites dog"
+
+<br><br>
+
+Same words, different order → different meaning  
+Positional encoding helps model distinguish this.
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/positional-encoding.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+PE(pos,2i)=sin(pos/10000^(2i/d))
+PE(pos,2i+1)=cos(pos/10000^(2i/d))
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import numpy as np
+
+def positional_encoding(pos, d_model):
+    PE = np.zeros((pos, d_model))
+    for i in range(pos):
+        for j in range(0, d_model, 2):
+            PE[i, j] = np.sin(i / (10000 ** ((2*j)/d_model)))
+            PE[i, j+1] = np.cos(i / (10000 ** ((2*j)/d_model)))
+    return PE
+
+print(positional_encoding(5,6))
+</pre>
+
+<div class="insight-box">
+Without positional encoding → transformer becomes “bag of words”.
+</div>
+
+
+<!-- ================= GPT (UPGRADED) ================= -->
+
+<h2 class="section-title">4. GPT (Generative Pretrained Transformer)</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+GPT is a decoder-only transformer model designed for generating text by predicting the next word in a sequence. Unlike traditional models, GPT learns language patterns by training on massive datasets and using a simple objective: predict the next token given previous tokens. It uses causal masking to ensure that future words are not visible during training. This allows GPT to generate coherent and context-aware text. Because of its scalability and simplicity, GPT has become one of the most powerful architectures in modern AI, powering applications like chatbots, code generation, and content creation.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Strong text generation capability</li>
+<li>Learns patterns from large datasets</li>
+<li>Scalable architecture</li>
+<li>Supports multiple downstream tasks</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Chatbots (like ChatGPT)</li>
+<li>Content generation</li>
+<li>Code generation</li>
+<li>Conversational AI</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Input: "AI will change the future because"
+
+<br><br>
+
+GPT Output:  
+"AI will change the future because it can automate tasks and improve decision making."
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/GPT.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+P(w₁,...,wₙ) = ∏ P(w_t | w₁,...,w_{t-1})
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
+
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+model = GPT2LMHeadModel.from_pretrained("gpt2")
+
+inputs = tokenizer("AI will", return_tensors="pt")
+outputs = model.generate(**inputs, max_length=20)
+
+print(tokenizer.decode(outputs[0]))
+</pre>
+
+<div class="insight-box">
+GPT predicts one token at a time → foundation of all generative AI systems.
+</div>
+
+
+<!-- ================= DECODER (UPGRADED) ================= -->
+
+<h2 class="section-title">5. Decoder Architecture</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+The decoder is a core component of transformer models responsible for generating output sequences. It operates in an autoregressive manner, meaning it generates one token at a time based on previously generated tokens. The decoder consists of masked self-attention, encoder-decoder attention (in seq2seq models), and feedforward layers. Masked attention ensures that the model cannot see future tokens, preserving causality. This design allows the decoder to generate coherent and logically consistent sequences. Decoder-only architectures like GPT rely entirely on this structure.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Ensures step-by-step generation</li>
+<li>Prevents future token leakage</li>
+<li>Maintains sequence coherence</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Text generation</li>
+<li>Machine translation</li>
+<li>Sequence-to-sequence tasks</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Input: "Translate English to French: Hello"
+
+<br><br>
+
+Decoder generates:
+"Bonjour"
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/encoder-decoder.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+Decoder = MaskedAttention + CrossAttention + FeedForward
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import torch
+
+def causal_mask(size):
+    return torch.tril(torch.ones(size, size))
+
+print(causal_mask(5))
+</pre>
+
+<div class="insight-box">
+Decoder = core of generation → used in GPT and all LLMs.
+</div>
+
+<!-- ================= BERT (UPGRADED) ================= -->
+
+<h2 class="section-title">6. BERT</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+BERT is an encoder-only transformer model designed for understanding text rather than generating it. Unlike GPT, which reads text left-to-right, BERT reads text in both directions simultaneously, allowing it to capture deep contextual relationships. It is trained using Masked Language Modeling (MLM), where some words are hidden and the model learns to predict them. This bidirectional learning makes BERT highly effective for tasks like classification, question answering, and named entity recognition. It revolutionized NLP by significantly improving performance across multiple benchmarks.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Captures bidirectional context</li>
+<li>Improves understanding of language</li>
+<li>High accuracy in NLP tasks</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Text classification</li>
+<li>NER systems</li>
+<li>Question answering</li>
+<li>Search ranking</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Sentence: "The bank is near the river"
+
+<br><br>
+
+BERT understands:
+"bank" → river side (not financial institution)
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/BERT.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+L = - Σ log P(w_i | context_without_w_i)
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from transformers import BertTokenizer, BertModel
+
+tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+model = BertModel.from_pretrained("bert-base-uncased")
+
+inputs = tokenizer("Transformers are powerful", return_tensors="pt")
+outputs = model(**inputs)
+
+print(outputs.last_hidden_state.shape)
+</pre>
+
+<div class="insight-box">
+BERT understands text deeply → but cannot generate like GPT.
+</div>
+
+<!-- ================= T5 (UPGRADED) ================= -->
+
+<h2 class="section-title">8. T5 (Text-to-Text Transformer)</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+T5 (Text-to-Text Transfer Transformer) is a powerful transformer model that treats every NLP task as a text-to-text problem. Instead of designing different architectures for tasks like translation, summarization, or classification, T5 converts all inputs and outputs into text format. For example, classification becomes "input text → label text". This unified approach simplifies model design and allows a single model to handle multiple tasks efficiently. T5 uses both encoder and decoder components, making it highly flexible. It is especially useful in modern AI systems where prompt-based learning and multi-task capabilities are required.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Unified framework for all NLP tasks</li>
+<li>Supports multi-task learning</li>
+<li>Simplifies system design</li>
+<li>Works well with prompt-based systems</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Multi-task AI systems</li>
+<li>Translation and summarization</li>
+<li>Prompt-based applications</li>
+<li>Fine-tuning on diverse tasks</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Task: Sentiment Classification
+
+<br><br>
+
+Input: "review: This product is amazing"  
+Output: "positive"
+
+<br><br>
+
+Task: Translation  
+Input: "translate English to German: AI is powerful"  
+Output: "KI ist mächtig"
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/T5.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+y = f(x; θ)
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+
+tokenizer = T5Tokenizer.from_pretrained("t5-small")
+model = T5ForConditionalGeneration.from_pretrained("t5-small")
+
+input_text = "summarize: AI is transforming industries rapidly"
+inputs = tokenizer(input_text, return_tensors="pt")
+
+outputs = model.generate(**inputs)
+print(tokenizer.decode(outputs[0]))
+</pre>
+
+<div class="insight-box">
+T5 = “Everything is text” → foundation of prompt engineering.
+</div>
+
+<!-- ================= RLHF (UPGRADED) ================= -->
+
+<h2 class="section-title">9. RLHF</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Reinforcement Learning from Human Feedback (RLHF) is a technique used to align language models with human expectations. While models trained on large datasets can generate fluent text, they may produce incorrect, harmful, or irrelevant responses. RLHF introduces a feedback loop where human evaluators rank model outputs based on quality. A reward model is trained on this feedback, and the main model is optimized to maximize this reward using reinforcement learning techniques. This process helps models become more helpful, safe, and aligned with user intent. RLHF is a key component behind systems like ChatGPT.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Aligns model behavior with human preferences</li>
+<li>Improves safety and reliability</li>
+<li>Reduces harmful or incorrect outputs</li>
+<li>Enhances user experience</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Chatbots and AI assistants</li>
+<li>Production LLM systems</li>
+<li>Safety-critical applications</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+User asks: "Explain AI simply"
+
+<br><br>
+
+Model outputs:
+1. Complex explanation ❌  
+2. Simple explanation ✅  
+
+<br><br>
+
+Human selects #2 → model learns preferred response style
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/RLHF.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+maximize E[R(x)]
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+# Conceptual RLHF loop
+
+for input_text in dataset:
+    output = model(input_text)
+    reward = reward_model(output)
+    
+    loss = -reward
+    loss.backward()
+</pre>
+
+<div class="insight-box">
+RLHF = reason why ChatGPT feels “human-like”.
+</div>
+
+<!-- ================= SCALING LAWS (UPGRADED) ================= -->
+
+<h2 class="section-title">10. Scaling Laws</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Scaling laws describe how the performance of machine learning models improves as we increase model size, dataset size, and computational power. Research has shown that larger models trained on more data tend to perform better in a predictable way. These improvements follow mathematical relationships known as power laws. Scaling laws help engineers understand how much improvement they can expect when increasing resources. This has driven the development of massive models like GPT-4. However, scaling also introduces challenges such as higher cost, energy consumption, and diminishing returns at extreme sizes.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Predicts model performance improvements</li>
+<li>Guides resource allocation</li>
+<li>Helps design large-scale systems</li>
+<li>Optimizes training strategies</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Training large language models</li>
+<li>Planning AI infrastructure</li>
+<li>Scaling production systems</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Small Model → Basic chatbot  
+
+<br><br>
+
+Large Model → ChatGPT-level reasoning  
+
+<br><br>
+
+More data + parameters → better performance
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/scaling-law.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+Loss ∝ N^(-α)
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import numpy as np
+import matplotlib.pyplot as plt
+
+N = np.array([1e3,1e4,1e5,1e6])
+loss = N ** (-0.1)
+
+plt.plot(N, loss)
+plt.xscale("log")
+plt.title("Scaling Law")
+plt.show()
+</pre>
+
+<div class="insight-box">
+Bigger models → better performance (but higher cost).
+</div>
+
+<!-- ================= ATTENTION VARIANTS (UPGRADED) ================= -->
+
+<h2 class="section-title">11. Attention Variants</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Standard self-attention in transformers has a quadratic time and memory complexity with respect to sequence length, making it inefficient for long inputs such as documents or code. To solve this, researchers developed attention variants that reduce computation while preserving performance. These include sparse attention, linear attention, and FlashAttention. Sparse attention limits interactions to selected tokens, linear attention approximates attention to achieve linear complexity, and FlashAttention optimizes memory access for faster GPU execution. These techniques are essential for scaling transformers to handle long sequences efficiently.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Reduces computational complexity from O(n²)</li>
+<li>Enables long sequence processing</li>
+<li>Improves speed and memory efficiency</li>
+<li>Makes large-scale models practical</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Long document processing</li>
+<li>Code understanding models</li>
+<li>Large-scale transformer systems</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Standard Attention:
+10,000 tokens → 100M computations ❌
+
+<br><br>
+
+Optimized Attention:
+Linear Attention → ~10,000 computations ✅
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/attention-varients.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+Standard Attention = O(n²)
+Linear Attention = O(n)
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+# Conceptual linear attention
+
+import torch
+
+Q = torch.rand(1,100,64)
+K = torch.rand(1,100,64)
+
+K_sum = K.sum(dim=1)
+output = Q @ K_sum.unsqueeze(-1)
+
+print(output.shape)
+</pre>
+
+<div class="insight-box">
+Attention optimization = key to scaling LLMs beyond context limits.
+</div>
+
+<!-- ================= MIXTURE OF EXPERTS (UPGRADED) ================= -->
+
+<h2 class="section-title">12. Mixture of Experts (MoE)</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Mixture of Experts (MoE) is a scalable neural network architecture that increases model capacity without increasing computation proportionally. Instead of activating the entire model for every input, MoE uses a gating network to select a subset of expert networks dynamically. Each expert specializes in different patterns, such as language, reasoning, or coding. This allows the model to scale to billions or even trillions of parameters efficiently. MoE is widely used in large-scale systems like Google’s Switch Transformer.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Scales model capacity efficiently</li>
+<li>Reduces computation cost</li>
+<li>Enables specialization of experts</li>
+<li>Improves performance on diverse tasks</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Large language models (LLMs)</li>
+<li>Multi-domain AI systems</li>
+<li>High-performance production models</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+User asks coding question → Code expert activated  
+
+<br><br>
+
+User asks medical question → Medical expert activated  
+
+<br><br>
+
+Only relevant experts are used → efficient + fast
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/MOE.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+Output = Σ gate_i(x) * expert_i(x)
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import torch
+
+# Example gating
+x = torch.rand(3)
+gate = torch.softmax(x, dim=0)
+
+experts = [torch.rand(3) for _ in range(3)]
+
+output = sum(gate[i] * experts[i] for i in range(3))
+print(output)
+</pre>
+
+<div class="insight-box">
+MoE = “use few parameters per input, but keep huge model capacity”.
+</div>
+
+<!-- ================= TRAINING TRANSFORMERS (UPGRADED) ================= -->
+
+<h2 class="section-title">13. Training Transformers</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Training transformer models involves optimizing millions or billions of parameters using large datasets and powerful hardware. The goal is to minimize a loss function, typically cross-entropy, using gradient descent. Due to the scale of these models, training requires advanced techniques such as learning rate scheduling, gradient clipping, and mixed precision training. Distributed training across multiple GPUs or TPUs is often necessary. Proper training ensures stability, convergence, and high performance in downstream tasks.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Optimizes model parameters</li>
+<li>Improves accuracy and performance</li>
+<li>Ensures stable learning</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Pretraining large models</li>
+<li>Fine-tuning models</li>
+<li>Building custom AI systems</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Training GPT:
+Input → "AI is"  
+Target → "powerful"
+
+<br><br>
+
+Model learns:
+Predict next word correctly
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/training-transformer.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+θ = θ - η ∇L(θ)
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import torch
+
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+
+loss.backward()
+optimizer.step()
+optimizer.zero_grad()
+</pre>
+
+<div class="insight-box">
+Training = most expensive part of LLM lifecycle.
+</div>
+
+<!-- ================= INFERENCE OPTIMIZATION (UPGRADED) ================= -->
+
+<h2 class="section-title">14. Inference Optimization</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Inference optimization focuses on making trained models faster and more efficient during deployment. Since large language models are computationally expensive, techniques such as quantization, KV caching, batching, and hardware acceleration are used to reduce latency and cost. KV caching stores previous computations in autoregressive models, avoiding redundant calculations. Quantization reduces model precision to decrease memory usage. These optimizations are critical for real-time applications like chatbots and APIs.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Reduces latency and response time</li>
+<li>Lowers computational cost</li>
+<li>Enables real-time AI applications</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Deploying LLMs in production</li>
+<li>Chatbots and APIs</li>
+<li>Real-time AI systems</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Without optimization:
+Response time = 5 seconds ❌
+
+<br><br>
+
+With KV cache:
+Response time = 1 second ✅
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/Inference-Optimization.png"><br><br>
+
+
+<h4>🧠 Mathematical Function</h4>
+<pre class="code-box">
+y_t = f(y_{t-1}, cache)
+</pre>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+with torch.no_grad():
+    output = model(input_ids)
+</pre>
+
+<div class="insight-box">
+Inference optimization = key to making AI usable at scale.
+</div>
+
+<!-- ================= APPLICATIONS ================= -->
+
+<h2 class="section-title">15. Applications</h2>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Transformers are widely used across industries, powering applications such as chatbots, recommendation systems, code generation, 
+and multimodal AI systems. Their ability to model complex relationships makes them suitable for a wide range of tasks.
+</p>
+
+<h4 class="sub">❓ Why we use?</h4>
+<ul>
+<li>Versatile architecture</li>
+<li>High performance</li>
+</ul>
+
+<h4 class="sub">📍 When to Use?</h4>
+<ul>
+<li>AI systems</li>
+<li>Automation</li>
+</ul>
+
+<hr>
+
+<!-- ================= FUTURE ================= -->
+
+<h2 class="section-title">16. Future of Transformers</h2>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+The future of transformers lies in efficiency, multimodality, and autonomous intelligence. Research is focused on reducing 
+computational costs, improving reasoning capabilities, and integrating multiple data modalities such as text, images, and audio.
+</p>
+
+<h4 class="sub">❓ Why we use?</h4>
+<ul>
+<li>Advancing AI capabilities</li>
+</ul>
+
+<h4 class="sub">📍 When to Use?</h4>
+<ul>
+<li>Next-generation AI systems</li>
+</ul>
+
+
+<!-- ================= FINAL ================= -->
+
+<h2 class="section-title">Final Insight</h2>
+
+<div class="insight-box">
+Transformers are not just models — they are the foundation of modern AI systems.
+</div>
+
+</div>
+
+<!-- ================= CTA ================= -->
+<div class="start-btn">
+    <button onclick="openPage('index.html')">Home Page →</button>
+</div>
+
+<script>
+function openPage(page){
+    window.location.href = page;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+body {
+    background-color: #020617;
+    color: #e2e8f0;
+    font-family: "Georgia", serif;
+    line-height: 2.1;
+}
+
+/* Container spacing */
+.container {
+    max-width: 900px;
+}
+
+/* Titles */
+.chapter-title {
+    font-size: 3rem;
+    margin-bottom: 30px;
+}
+
+.section-title {
+    margin-top: 70px;
+    margin-bottom: 20px;
+    color: #60a5fa;
+}
+
+/* Sub sections */
+.sub {
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+/* Code block FIX */
+.code-box {
+    background: #000;
+    padding: 18px;
+    border-left: 4px solid #22c55e;
+    margin: 25px 0;
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+
+    /* CRITICAL FIXES */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    line-height: 1.6;
+    border-radius: 6px;
+}
+
+/* Example box */
+.example-box {
+    background: #1e293b;
+    padding: 18px;
+    border-left: 4px solid #38bdf8;
+    margin: 25px 0;
+    border-radius: 6px;
+}
+
+/* Insight box */
+.insight-box {
+    background: #111827;
+    padding: 18px;
+    border-left: 4px solid #facc15;
+    margin-top: 25px;
+    border-radius: 6px;
+}
+
+/* Paragraph spacing */
+p {
+    margin-bottom: 15px;
+}
+
+/* List spacing */
+ul {
+    margin-bottom: 15px;
+    padding-left: 20px;
+}
+img{
+    width: 100%;
+}
+/* ================= GLOBAL ================= */
+body {
+    background: radial-gradient(circle at top, #020617, #000000);
+    color: #e2e8f0;
+    font-family: 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+}
+
+/* ================= HERO ================= */
+.hero {
+    text-align: center;
+    margin-bottom: 50px;
+    padding: 0 10px;
+}
+
+.hero h1 {
+    font-weight: 700;
+    background: linear-gradient(90deg, #38bdf8, #6366f1);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.hero p {
+    color: #94a3b8;
+}
+
+/* ================= CARD ================= */
+.card {
+    background: rgba(15, 23, 42, 0.6);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    transition: all 0.3s ease;
+    padding: 20px;
+    height: 100%;
+}
+
+/* Hover only for desktop */
+@media (hover:hover){
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 0 20px rgba(99,102,241,0.3);
+}
+}
+
+/* Tap feedback for mobile */
+.card:active {
+    transform: scale(0.98);
+}
+
+/* ================= TEXT ================= */
+.card h3 {
+    font-size: 1.2rem;
+}
+
+.card p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* ================= CATEGORY COLORS ================= */
+.nlp { border-left: 4px solid #22c55e; }
+.transformer { border-left: 4px solid #3b82f6; }
+.llm { border-left: 4px solid #8b5cf6; }
+.rag { border-left: 4px solid #f59e0b; }
+.agent { border-left: 4px solid #ef4444; }
+.project { border-left: 4px solid #14b8a6; }
+
+/* ================= CTA ================= */
+.start-btn {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.start-btn button {
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    color: white;
+    font-weight: 600;
+    width: 100%;
+    max-width: 280px;
+}
+
+/* ================= MOBILE OPTIMIZATION ================= */
+@media (max-width: 768px){
+
+.hero h1 {
+    font-size: 1.8rem;
+}
+
+.hero p {
+    font-size: 0.9rem;
+}
+
+.card {
+    padding: 18px;
+}
+
+.card h3 {
+    font-size: 1.1rem;
+}
+
+.card p {
+    font-size: 0.85rem;
+}
+
+}
+
+/* ================= TABLET ================= */
+@media (min-width: 769px) and (max-width: 1024px){
+
+.hero h1 {
+    font-size: 2.2rem;
+}
+
+}
+
+/* ================= DESKTOP ================= */
+@media (min-width: 1025px){
+
+.hero h1 {
+    font-size: 3rem;
+}
+
+}

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>NLP Engineering Handbook - Deep Edition</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="./asset/css/style.css">
+</head>
+<body class="p-5 bg-dark text-light">
+<div class="container">
+
+<h1 class="chapter-title">📘 NLP Engineering Handbook</h1>
+<img src="./asset/img/NLP.png"><br><br>
+<p>
+Natural Language Processing (NLP) is a critical domain of artificial intelligence that focuses on enabling machines to understand, interpret, and manipulate human language. Unlike structured data, human language is inherently ambiguous, context-dependent, and highly dynamic. NLP bridges the gap between human communication and machine understanding by transforming textual data into structured representations that machines can process. This handbook is designed to provide a deep engineering perspective of NLP, covering foundational techniques, linguistic processing, statistical methods, and neural architectures. The goal is not just to use NLP tools, but to understand their internal mechanics, trade-offs, and real-world applicability in designing scalable and efficient systems.
+</p>
+
+<!-- ================= TEXT PREPROCESSING ================= -->
+
+<h2 class="section-title">1. Text Preprocessing</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Text preprocessing is the foundational stage of any NLP pipeline, where raw textual data is cleaned and normalized before further processing. Real-world text data is often noisy and contains punctuation, HTML tags, emojis, inconsistent casing, and irrelevant symbols that can negatively impact model performance. Preprocessing ensures that the input data is standardized, making it easier for models to extract meaningful patterns. It reduces vocabulary size, eliminates redundancy, and improves computational efficiency. Without preprocessing, models may learn incorrect or misleading relationships, leading to poor generalization. Therefore, preprocessing is not just a cleaning step—it is a crucial transformation stage that directly influences the effectiveness of downstream NLP tasks.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Removes noise and inconsistencies</li>
+<li>Standardizes input text</li>
+<li>Improves model accuracy</li>
+<li>Reduces computational complexity</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Before any NLP pipeline</li>
+<li>Working with raw text data</li>
+<li>Text classification, sentiment analysis</li>
+</ul>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/text-processing.png"><br><br>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import re
+
+text = "Hello!!! NLP is AMAZING :)"
+clean_text = re.sub(r'[^a-zA-Z ]', '', text).lower()
+
+print(clean_text)
+</pre>
+
+
+<!-- ================= TOKENIZATION ================= -->
+
+<h2 class="section-title">2. Tokenization</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Tokenization is the process of splitting text into smaller meaningful units called tokens. These tokens can be words, characters, or subwords depending on the task. Since machine learning models cannot process raw text directly, tokenization converts text into structured inputs. It plays a crucial role in defining vocabulary, sequence length, and computational efficiency. Poor tokenization can lead to information loss or increased complexity. Modern NLP systems often use subword tokenization to handle unknown words and reduce vocabulary size. Thus, tokenization is a key design decision that directly affects model performance and scalability.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Converts text into machine-readable units</li>
+<li>Defines vocabulary space</li>
+<li>Improves processing efficiency</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Before feature extraction</li>
+<li>In all NLP pipelines</li>
+</ul>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/tokenization.png"><br><br>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from nltk.tokenize import word_tokenize
+
+text = "NLP is powerful"
+tokens = word_tokenize(text)
+
+print(tokens)
+</pre>
+
+<!-- ================= STEMMING ================= -->
+
+<h2 class="section-title">3. Stemming</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Stemming is a normalization technique used to reduce words to their root form by removing suffixes and prefixes. It is a rule-based heuristic approach that does not consider linguistic correctness, often producing non-dictionary words. Despite its limitations, stemming is computationally efficient and widely used in search engines and information retrieval systems. By reducing variations of a word to a common base, it helps improve matching and reduces vocabulary size. However, it may distort meaning, making it less suitable for tasks requiring semantic accuracy.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Reduces vocabulary size</li>
+<li>Improves search matching</li>
+<li>Enhances efficiency</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Search engines</li>
+<li>Information retrieval systems</li>
+</ul>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/stemming.png"><br><br>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from nltk.stem import PorterStemmer
+
+stemmer = PorterStemmer()
+words = ["running", "runner", "runs"]
+
+print([stemmer.stem(w) for w in words])
+</pre>
+
+<!-- ================= LEMMATIZATION ================= -->
+
+<h2 class="section-title">4. Lemmatization</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Lemmatization reduces words to their base or dictionary form by considering context and grammar. Unlike stemming, it produces meaningful words and uses linguistic rules and vocabulary databases. It relies on part-of-speech tagging to determine the correct base form. Lemmatization is more accurate but computationally expensive. It is widely used in applications requiring semantic understanding, such as chatbots and translation systems.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Improves semantic accuracy</li>
+<li>Produces meaningful base words</li>
+<li>Better than stemming</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Semantic NLP tasks</li>
+<li>High-accuracy systems</li>
+</ul>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/lemmatization.png"><br><br>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import spacy
+
+nlp = spacy.load("en_core_web_sm")
+doc = nlp("running better cars")
+
+print([token.lemma_ for token in doc])
+</pre>
+
+<!-- ================= BAG OF WORDS ================= -->
+
+<h2 class="section-title">5. Bag of Words</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Bag of Words is a simple technique that converts text into numerical vectors based on word frequency. It ignores word order but captures occurrence information. Each document is represented as a vector of word counts, making it easy to implement and interpret. However, it lacks contextual understanding.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Simple representation</li>
+<li>Baseline models</li>
+<li>Easy to implement</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Text classification</li>
+<li>Baseline systems</li>
+</ul>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/bag-of-words.png"><br><br>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from sklearn.feature_extraction.text import CountVectorizer
+
+docs = ["NLP is fun", "NLP is powerful"]
+
+vectorizer = CountVectorizer()
+X = vectorizer.fit_transform(docs)
+
+print(X.toarray())
+</pre>
+
+<!-- ================= TF-IDF ================= -->
+
+<h2 class="section-title">6. TF-IDF</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+TF-IDF evaluates word importance based on frequency in a document relative to corpus frequency. It reduces the weight of common words and highlights rare but meaningful terms. It is widely used in search engines and document ranking.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Highlights important words</li>
+<li>Reduces noise</li>
+<li>Improves ranking</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Search engines</li>
+<li>Document similarity</li>
+</ul>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/tf-idf.png"><br><br>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+docs = ["AI is powerful", "AI is everywhere"]
+
+tfidf = TfidfVectorizer()
+X = tfidf.fit_transform(docs)
+
+print(X.toarray())
+</pre>
+
+<!-- ================= WORD2VEC ================= -->
+
+<h2 class="section-title">7. Word2Vec</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Word2Vec generates dense vector embeddings capturing semantic relationships between words. It uses CBOW and Skip-Gram architectures to learn contextual relationships. It allows models to understand similarity and analogies.
+</p>
+
+<h4>❓ Why We Use It</h4>
+<ul>
+<li>Captures semantic similarity</li>
+<li>Dense vector representation</li>
+<li>Improves deep learning models</li>
+</ul>
+
+<h4>📌 When to Use</h4>
+<ul>
+<li>Embedding tasks</li>
+<li>Clustering</li>
+</ul>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/w2v.png"><br><br>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from gensim.models import Word2Vec
+
+sentences = [["king","queen"],["man","woman"]]
+
+model = Word2Vec(sentences, vector_size=50, min_count=1)
+
+print(model.wv.most_similar("king"))
+</pre>
+
+<!-- ================= POS TAGGING (UPGRADED) ================= -->
+
+<h2 class="section-title">8. POS Tagging</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Part-of-Speech (POS) tagging is the process of assigning grammatical categories such as noun, verb, adjective, or adverb to each word in a sentence. It plays a crucial role in understanding the structure and meaning of natural language. Since many words can have different meanings depending on context, POS tagging helps resolve ambiguity by identifying the correct role of each word. For example, the word “book” can be a noun or a verb depending on usage. POS tagging enables machines to better understand sentence structure, which is essential for tasks like parsing, translation, and information extraction. It acts as a foundational step in building intelligent NLP systems.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Helps in understanding sentence structure</li>
+<li>Resolves ambiguity of words with multiple meanings</li>
+<li>Improves performance of downstream NLP tasks</li>
+<li>Essential for parsing, translation, and semantic analysis</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>In syntactic parsing and grammar analysis</li>
+<li>In machine translation systems</li>
+<li>In information extraction and question answering</li>
+<li>In chatbots and voice assistants</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Sentence: <br>
+"I can book a ticket"
+
+<br><br>
+
+POS Tags: <br>
+"I/PRP can/MD book/VB a/DT ticket/NN"
+
+<br><br>
+
+Explanation: <br>
+Here, "book" is identified as a verb (VB), not a noun.
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/pos-tagging.png"><br><br>
+
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import nltk
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+
+text = "AI is transforming industries"
+tokens = nltk.word_tokenize(text)
+
+pos_tags = nltk.pos_tag(tokens)
+
+print(pos_tags)
+</pre>
+
+<div class="example-box">
+Output:
+[('AI', 'NNP'), ('is', 'VBZ'), ('transforming', 'VBG'), ('industries', 'NNS')]
+</div>
+
+<div class="insight-box">
+<strong>Insight:</strong> POS tagging is a core component in traditional NLP pipelines, but in modern transformer-based models, grammatical understanding is learned implicitly through attention mechanisms. However, POS tagging is still valuable for explainability and structured NLP systems.
+</div>
+
+<!-- ================= NER (UPGRADED) ================= -->
+
+<h2 class="section-title">9. Named Entity Recognition</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Named Entity Recognition (NER) is a Natural Language Processing technique used to identify and classify important entities in text into predefined categories such as person names, organizations, locations, dates, and more. It transforms unstructured text into structured information, making it easier for machines to understand real-world context. For example, in the sentence "Elon Musk founded SpaceX", NER identifies "Elon Musk" as a person and "SpaceX" as an organization. This capability is essential for building intelligent systems that can extract meaningful insights from large volumes of text. NER is widely used in search engines, chatbots, recommendation systems, and financial data analysis.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Converts unstructured text into structured data</li>
+<li>Extracts key information automatically</li>
+<li>Improves search and recommendation systems</li>
+<li>Enables automation in data processing pipelines</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>In information extraction systems</li>
+<li>In chatbots and virtual assistants</li>
+<li>In financial and news analysis</li>
+<li>In document classification and summarization</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Sentence: <br>
+"Elon Musk founded SpaceX in California in 2002"
+
+<br><br>
+
+NER Output: <br>
+Elon Musk → PERSON <br>
+SpaceX → ORGANIZATION <br>
+California → LOCATION <br>
+2002 → DATE
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/NER.png"><br><br>
+
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+import spacy
+
+# Load pre-trained model
+nlp = spacy.load("en_core_web_sm")
+
+text = "Elon Musk founded SpaceX in California in 2002"
+doc = nlp(text)
+
+# Extract entities
+for ent in doc.ents:
+    print(ent.text, ent.label_)
+</pre>
+
+<div class="example-box">
+Output:
+Elon Musk PERSON  
+SpaceX ORG  
+California GPE  
+2002 DATE
+</div>
+
+<div class="insight-box">
+<strong>Insight:</strong> Traditional NER uses rule-based and statistical models, while modern systems use transformer-based architectures like BERT. In LLMs, entity understanding is learned implicitly, but explicit NER is still critical for structured pipelines like knowledge graphs, search engines, and enterprise AI systems.
+</div>
+
+<!-- ================= RNN (UPGRADED) ================= -->
+
+<h2 class="section-title">10. RNN</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Recurrent Neural Networks (RNNs) are a class of neural networks designed to handle sequential data by maintaining a hidden state that captures information from previous time steps. Unlike traditional feedforward networks, RNNs process input data step-by-step, allowing them to model dependencies in sequences such as text, speech, and time-series data. This makes them particularly useful for tasks where context and order matter. For example, in a sentence, the meaning of a word often depends on the words before it. RNNs attempt to capture this temporal relationship by passing information through hidden states. However, they suffer from limitations like vanishing gradients, which led to the development of more advanced models like LSTM and Transformers.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Handles sequential and time-dependent data</li>
+<li>Captures context from previous inputs</li>
+<li>Enables tasks like language modeling and prediction</li>
+<li>Forms the foundation for advanced architectures like LSTM and GRU</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Text generation and next-word prediction</li>
+<li>Speech recognition systems</li>
+<li>Time-series forecasting</li>
+<li>Sequence classification problems</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Sentence Prediction Task: <br>
+"I love machine learning"
+
+<br><br>
+
+RNN learns sequence like: <br>
+"I" → "love" → "machine" → "learning"
+
+<br><br>
+
+Goal: Predict next word → "learning"
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/RNN.png"><br><br>
+
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import SimpleRNN, Dense
+import numpy as np
+
+# Sample sequential data
+X = np.array([[[1],[2],[3]], [[2],[3],[4]]])
+y = np.array([4,5])
+
+# Build model
+model = Sequential([
+    SimpleRNN(10, activation='tanh', input_shape=(3,1)),
+    Dense(1)
+])
+
+model.compile(optimizer='adam', loss='mse')
+
+# Train model
+model.fit(X, y, epochs=100, verbose=0)
+
+# Predict
+print(model.predict(X))
+</pre>
+
+<div class="example-box">
+Output:
+Predicted next values close to [4, 5]
+</div>
+
+<div class="insight-box">
+<strong>Insight:</strong> RNNs introduced the concept of sequence modeling, but they struggle with long-term dependencies due to vanishing gradients. This limitation led to LSTM and GRU architectures, and eventually to Transformers, which completely remove sequential processing using attention mechanisms.
+</div>
+
+<!-- ================= LSTM (UPGRADED) ================= -->
+
+<h2 class="section-title">11. LSTM</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Long Short-Term Memory (LSTM) is a specialized type of Recurrent Neural Network designed to overcome the limitations of standard RNNs, particularly the vanishing gradient problem. While traditional RNNs struggle to retain information over long sequences, LSTMs introduce a gating mechanism that allows the network to selectively remember or forget information. These gates—input, forget, and output—control the flow of information through the network, enabling it to capture long-term dependencies effectively. This makes LSTMs highly suitable for tasks where context over long sequences is important, such as language modeling, translation, and speech recognition. LSTMs played a crucial role in advancing NLP before the rise of Transformer-based architectures.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Solves vanishing gradient problem in RNNs</li>
+<li>Captures long-term dependencies in sequences</li>
+<li>Maintains memory over long text inputs</li>
+<li>Improves performance in sequential tasks</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Long text sequence modeling</li>
+<li>Language translation systems</li>
+<li>Speech recognition</li>
+<li>Time-series forecasting</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Sentence: <br>
+"I grew up in France ... I speak fluent French"
+
+<br><br>
+
+Problem: <br>
+To understand "French", the model must remember "France" from earlier in the sentence.
+
+<br><br>
+
+Solution: <br>
+LSTM remembers long-term context → connects "France" → "French"
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/LSTM.png"><br><br>
+
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense
+import numpy as np
+
+# Sample sequential dataset
+X = np.array([[[1],[2],[3]], [[2],[3],[4]]])
+y = np.array([4,5])
+
+# Build LSTM model
+model = Sequential([
+    LSTM(50, activation='tanh', input_shape=(3,1)),
+    Dense(1)
+])
+
+model.compile(optimizer='adam', loss='mse')
+
+# Train model
+model.fit(X, y, epochs=100, verbose=0)
+
+# Predict
+print(model.predict(X))
+</pre>
+
+<div class="example-box">
+Output:
+Predicted values close to [4, 5]
+</div>
+
+<div class="insight-box">
+<strong>Insight:</strong> LSTMs significantly improved sequence modeling by handling long-term dependencies, but they are still sequential in nature and slow to train. This limitation led to the development of Transformers, which use attention mechanisms to process sequences in parallel and achieve better scalability.
+</div>
+
+<!-- ================= EVALUATION METRICS (UPGRADED) ================= -->
+
+<h2 class="section-title">12. Evaluation Metrics</h2>
+
+<h4>📖 Introduction</h4>
+<p>
+Evaluation metrics are used to measure how well an NLP model performs on a given task. Since models make predictions, it is essential to quantify how accurate and reliable those predictions are. Different tasks require different evaluation methods—for example, classification tasks use precision and recall, while text generation tasks may use BLEU or ROUGE scores. A good evaluation metric helps identify model strengths and weaknesses, ensures fair comparison between models, and guides improvements. Without proper evaluation, a model may appear accurate but fail in real-world scenarios. Therefore, choosing the right metric is as important as building the model itself.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Measures model accuracy and performance</li>
+<li>Helps compare different models objectively</li>
+<li>Identifies strengths and weaknesses</li>
+<li>Ensures reliability before deployment</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>After training a model</li>
+<li>During model validation and testing</li>
+<li>While tuning hyperparameters</li>
+<li>Before deploying models in production</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Spam Detection System:
+
+<br><br>
+
+Actual Labels: [Spam, Not Spam, Spam] <br>
+Predicted Labels: [Spam, Not Spam, Not Spam]
+
+<br><br>
+
+Here:
+- Precision → How many predicted spam are actually spam  
+- Recall → How many actual spam were correctly identified  
+- F1 Score → Balance between precision and recall
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/evaluation-matrics.png"><br><br>
+
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+from sklearn.metrics import precision_score, recall_score, f1_score
+
+# Actual and predicted labels
+y_true = [1, 0, 1, 1]
+y_pred = [1, 0, 0, 1]
+
+# Calculate metrics
+precision = precision_score(y_true, y_pred)
+recall = recall_score(y_true, y_pred)
+f1 = f1_score(y_true, y_pred)
+
+print("Precision:", precision)
+print("Recall:", recall)
+print("F1 Score:", f1)
+</pre>
+
+<div class="example-box">
+Output:
+Precision: 1.0  
+Recall: 0.66  
+F1 Score: 0.8
+</div>
+
+<div class="insight-box">
+<strong>Insight:</strong> In modern NLP systems like LLMs, traditional metrics such as F1 score are not always sufficient. Tasks like text generation require advanced evaluation methods such as BLEU, ROUGE, and even human evaluation. Choosing the wrong metric can lead to misleading conclusions about model performance.
+</div>
+
+</div>
+
+<!-- ================= CTA ================= -->
+<div class="start-btn">
+    <button onclick="openPage('index.html')">Home Page →</button>
+</div>
+
+<script>
+function openPage(page){
+    window.location.href = page;
+}
+</script>
+</body>
+
+</html>

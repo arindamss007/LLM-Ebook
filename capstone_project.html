@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Enterprise LLM Architecture Handbook</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="./asset/css/style.css">
+</head>
+
+<body class="p-5">
+<!-- ===================================================== -->
+<!-- PRODUCTION LLM PROJECT (UPGRADED) -->
+<!-- ===================================================== -->
+
+<h2 class="chapter-title">🚀 LLM Project (RAG + API + Streaming)</h2>
+
+<h3 class="section-title">Project Overview</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+In this project, we build a complete production-grade LLM system that simulates real-world AI applications such as ChatGPT, enterprise copilots, and knowledge assistants. Unlike simple prototypes, this system integrates multiple layers including retrieval pipelines, caching, API services, and streaming responses. The goal is to design a system that is not only accurate but also scalable, efficient, and cost-optimized. By combining Retrieval-Augmented Generation (RAG) with LLMs, we ensure that responses are grounded in real data instead of relying purely on pre-trained knowledge. This project helps you understand how modern AI systems are engineered and deployed in production environments.
+</p><br>
+
+<h4>❓ What We Are Building</h4>
+<ul>
+<li>End-to-end LLM system</li>
+<li>RAG-based intelligent chatbot</li>
+<li>Production-ready backend API</li>
+<li>Streaming response system</li>
+</ul><br>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>LLMs hallucinate without external knowledge</li>
+<li>Real systems need low latency and scalability</li>
+<li>Enterprise AI requires structured pipelines</li>
+</ul><br>
+
+<h4>📌 When We Use This System</h4>
+<ul>
+<li>Customer support automation</li>
+<li>Enterprise knowledge assistants</li>
+<li>Search and Q&A systems</li>
+</ul><br>
+
+<h4>🎯 What This Will Create</h4>
+<div class="example-box">
+User → API → Retrieval → Context → LLM → Streaming → Response
+</div>
+
+
+<h3 class="section-title">System Architecture</h3>
+<img src="./asset/img/Project-System-Architecture.png">
+
+
+<div class="example-box">
+Client → FastAPI → RAG Pipeline → Vector DB → Cache → LLM → Streaming → Response
+</div>
+
+<h3 class="section-title">Step 1: Project Structure</h3>
+
+<h4>📖 What We Are Doing</h4>
+<p>
+We organize the system into modular components. This separation ensures maintainability, scalability, and easier debugging.
+</p>
+
+<h4>❓ Why</h4>
+<ul>
+<li>Improves code readability</li>
+<li>Enables scaling of individual components</li>
+<li>Follows industry best practices</li>
+</ul>
+
+<pre class="code-box">
+project/
+│── app.py        # API Layer
+│── rag.py        # Pipeline Logic
+│── embeddings.py # Embedding Model
+│── vector_db.py  # Retrieval Engine
+│── cache.py      # Caching Layer
+│── config.py     # Configuration
+</pre>
+
+
+<h3 class="section-title">Step 2: Embeddings Layer</h3>
+
+<h4>📖 What We Are Doing</h4>
+<p>
+We convert text into vector embeddings so that machines can understand semantic similarity instead of exact keyword matching.
+</p>
+
+<h4>❓ Why</h4>
+<ul>
+<li>Enables semantic search</li>
+<li>Improves retrieval accuracy</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+"AI" and "Artificial Intelligence" → different words but similar meaning → embeddings capture this
+</div>
+
+<pre class="code-box">
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+def embed(text):
+    return model.encode([text])
+</pre>
+
+
+<h3 class="section-title">Step 3: Vector Database</h3>
+
+<h4>📖 What We Are Doing</h4>
+<p>
+We store embeddings in a vector database and perform similarity search to find relevant documents.
+</p>
+
+<h4>❓ Why</h4>
+<ul>
+<li>Fast retrieval</li>
+<li>Scalable search</li>
+</ul>
+
+<h4>📌 When</h4>
+<ul>
+<li>Large datasets</li>
+<li>Search systems</li>
+</ul>
+
+<pre class="code-box">
+import faiss
+import numpy as np
+
+index = faiss.IndexFlatL2(384)
+
+def add_vectors(vectors):
+    index.add(np.array(vectors))
+
+def search(query_vec):
+    return index.search(query_vec, k=2)
+</pre>
+
+
+<h3 class="section-title">Step 4: Retrieval Layer</h3>
+
+<h4>📖 What We Are Doing</h4>
+<p>
+We retrieve the most relevant documents based on user query.
+</p>
+
+<h4>❓ Why</h4>
+<ul>
+<li>Provides context to LLM</li>
+<li>Improves factual accuracy</li>
+</ul>
+
+<pre class="code-box">
+documents = ["AI is intelligence", "ML is subset of AI"]
+
+def retrieve(query):
+    q_vec = embed(query)
+    _, I = search(q_vec)
+    return [documents[i] for i in I[0]]
+</pre>
+
+
+<h3 class="section-title">Step 5: Caching Layer</h3>
+
+<h4>📖 What We Are Doing</h4>
+<p>
+We store previously generated responses to avoid recomputation.
+</p>
+
+<h4>❓ Why</h4>
+<ul>
+<li>Reduces latency</li>
+<li>Saves cost</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Same query repeated → served instantly from cache
+</div>
+
+<pre class="code-box">
+cache = {}
+
+def get_cache(q):
+    return cache.get(q)
+
+def set_cache(q, res):
+    cache[q] = res
+</pre>
+
+
+<h3 class="section-title">Step 6: LLM Generation</h3>
+
+<h4>📖 What We Are Doing</h4>
+<p>
+We generate the final response using the LLM based on retrieved context.
+</p>
+
+<h4>❓ Why</h4>
+<ul>
+<li>Combines reasoning + knowledge</li>
+<li>Produces human-like responses</li>
+</ul>
+
+<pre class="code-box">
+from transformers import pipeline
+
+generator = pipeline("text-generation", model="gpt2")
+
+def generate(query, context):
+    prompt = query + " " + " ".join(context)
+    return generator(prompt, max_length=50)[0]['generated_text']
+</pre>
+
+
+<h3 class="section-title">Step 7: RAG Pipeline</h3>
+
+<h4>📖 What We Are Doing</h4>
+<p>
+We integrate retrieval, generation, and caching into a unified pipeline.
+</p>
+
+<pre class="code-box">
+def rag(query):
+    cached = get_cache(query)
+    if cached:
+        return cached
+
+    context = retrieve(query)
+    response = generate(query, context)
+
+    set_cache(query, response)
+    return response
+</pre>
+
+
+
+<h3 class="section-title">Step 8: API Layer</h3>
+
+<h4>📖 What We Are Doing</h4>
+<p>
+We expose the system as an API so it can be accessed by applications.
+</p>
+
+<pre class="code-box">
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/query")
+def query(q: str):
+    return {"response": rag(q)}
+</pre>
+
+
+<h3 class="section-title">Step 9: Streaming</h3>
+
+<h4>📖 What We Are Doing</h4>
+<p>
+We stream responses token-by-token for better user experience.
+</p>
+
+<pre class="code-box">
+def stream(text):
+    for word in text.split():
+        yield word + " "
+</pre>
+
+
+<h3 class="section-title">Step 10: Async Optimization</h3>
+
+<h4>📖 What We Are Doing</h4>
+<p>
+We use asynchronous execution to improve performance and handle multiple requests.
+</p>
+
+<pre class="code-box">
+import asyncio
+
+async def async_retrieve(q):
+    return retrieve(q)
+
+async def pipeline(q):
+    context = await async_retrieve(q)
+    return generate(q, context)
+</pre>
+
+
+<h3 class="section-title">Final Output</h3>
+
+<div class="example-box">
+Input: "Explain AI"
+
+<br><br>
+
+Output:
+"AI is intelligence demonstrated by machines..."
+</div>
+
+
+<h3 class="section-title">🚀 What You Built</h3>
+
+<ul>
+<li>Complete RAG system</li>
+<li>LLM-powered API backend</li>
+<li>Efficient retrieval pipeline</li>
+<li>Scalable architecture foundation</li>
+</ul>
+
+
+<div class="insight-box">
+This system represents the core architecture used in modern AI platforms like ChatGPT and enterprise copilots.
+</div>
+
+<!-- ================= CTA ================= -->
+<div class="start-btn">
+    <button onclick="openPage('index.html')">Home Page →</button>
+</div>
+
+<script>
+function openPage(page){
+    window.location.href = page;
+}
+</script>
+</body>
+</html>

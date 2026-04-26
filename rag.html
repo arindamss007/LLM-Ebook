@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>RAG Engineering Handbook - FAANG Level</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="./asset/css/style.css">
+
+</head>
+
+<body class="p-5">
+<div class="container">
+
+<h1 class="chapter-title">🔍 RAG Engineering</h1>
+
+<p>
+Retrieval-Augmented Generation (RAG) is a production-grade architecture that enhances language models by integrating external 
+knowledge retrieval into the generation process. Unlike standalone models that rely only on parametric knowledge, RAG systems 
+retrieve relevant information dynamically from large-scale data sources such as documents, databases, and APIs. This enables 
+accurate, up-to-date, and domain-specific responses without retraining models. At enterprise scale, RAG systems must handle 
+millions of documents, low-latency retrieval, and high concurrency. This handbook focuses strictly on RAG engineering, covering 
+pipeline design, hybrid search, multi-hop reasoning, caching strategies, and system orchestration used in real-world production systems.
+</p>
+
+<hr>
+
+<!-- ================= RAG PIPELINE (UPGRADED) ================= -->
+
+<h3 class="section-title">RAG Pipeline</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+The RAG pipeline is the core architecture that transforms a user query into a grounded and factual response. Instead of relying only on a model’s internal knowledge, RAG retrieves relevant information from external data sources and injects it into the generation process. The pipeline typically involves query embedding, document retrieval, context construction, and response generation. Each stage must be optimized for latency, accuracy, and cost. A well-designed pipeline ensures that responses are both relevant and up-to-date, making it essential for enterprise AI systems such as knowledge assistants and search engines.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Reduces hallucination</li>
+<li>Provides real-time knowledge</li>
+<li>Improves answer accuracy</li>
+<li>Supports domain-specific AI</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Enterprise knowledge systems</li>
+<li>Customer support bots</li>
+<li>Document-based Q&A</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+User: "Company leave policy?"
+
+<br><br>
+
+Pipeline:
+Query → Retrieve policy doc → Generate answer based on doc
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/RAG-Pipeline.png"><br><br>
+
+
+<h4>📐 Math</h4>
+<div class="example-box">
+argmax cosine(q, d)
+</div>
+
+<h4>💻 Python Implementation</h4>
+<pre class="code-box">
+def rag_pipeline(query, docs):
+    retrieved = docs[0]
+    return f"Answer based on: {retrieved}"
+
+print(rag_pipeline("What is AI?", ["AI is intelligence"]))
+</pre>
+
+<div class="insight-box">
+RAG = retrieval + generation → foundation of enterprise GenAI.
+</div>
+
+<!-- ================= HYBRID SEARCH (UPGRADED) ================= -->
+
+<h3 class="section-title">Hybrid Search (BM25 + Dense)</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+Hybrid search combines keyword-based retrieval (BM25) with semantic vector search to achieve better retrieval performance. BM25 focuses on exact keyword matches, making it effective for precise queries, while dense retrieval captures semantic meaning, enabling understanding of paraphrased or ambiguous queries. By combining both methods, hybrid search balances precision and recall. This is essential in real-world systems where queries vary widely in structure and intent. Enterprise systems use weighted scoring or rank fusion to combine results from both methods effectively.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Improves recall and precision</li>
+<li>Handles both exact and semantic queries</li>
+<li>Reduces retrieval errors</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Search engines</li>
+<li>RAG systems</li>
+<li>Enterprise knowledge bases</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Query: "AI definition"
+
+<br><br>
+
+BM25 → finds exact keyword "AI"  
+Dense → finds similar meaning "Artificial Intelligence"
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/hybrid_search_Rag.png"><br><br>
+
+
+<h4>📐 Math</h4>
+<div class="example-box">
+Score = α * BM25 + (1-α) * Dense
+</div>
+
+<h4>💻 Python</h4>
+<pre class="code-box">
+alpha = 0.5
+bm25_score = 0.7
+dense_score = 0.8
+
+score = alpha*bm25_score + (1-alpha)*dense_score
+print(score)
+</pre>
+
+<div class="insight-box">
+Hybrid search = best of keyword + semantic retrieval.
+</div>
+
+<!-- ================= CHUNKING ================= -->
+
+<h3 class="section-title">Chunking</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Chunking splits large documents into smaller segments before embedding. Proper chunking ensures better retrieval accuracy. 
+Overlapping chunks preserve context, while smaller chunks improve precision. Poor chunking leads to irrelevant retrieval results.
+</p>
+
+<div class="example-box">
+Doc → Chunks → Embeddings
+</div>
+
+<pre class="code-box">
+def chunk(text, size=100):
+    return [text[i:i+size] for i in range(0,len(text),size)]
+</pre>
+
+<hr>
+
+<!-- ================= RE-RANKING ================= -->
+
+<h3 class="section-title">Re-ranking</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Re-ranking improves retrieval quality by applying a second-stage model to refine results. First-stage retrieval is fast but 
+approximate, while re-ranking ensures higher accuracy.
+</p>
+
+<div class="example-box">
+Retrieve → Re-rank → Top-K
+</div>
+
+<hr>
+
+<!-- ================= MULTI HOP RAG (UPGRADED) ================= -->
+
+<h3 class="section-title">Multi-Hop RAG</h3>
+
+<h4>📖 Introduction</h4>
+<p>
+Multi-hop RAG is an advanced retrieval strategy that enables reasoning across multiple documents. Instead of retrieving information in a single step, the system performs iterative retrieval, refining the query at each step. This allows the model to connect information from different sources, making it suitable for complex queries. Multi-hop RAG is essential for tasks requiring deep reasoning or multi-step understanding.
+</p>
+
+<h4>❓ Why We Need It</h4>
+<ul>
+<li>Handles complex queries</li>
+<li>Enables multi-step reasoning</li>
+<li>Improves answer completeness</li>
+</ul>
+
+<h4>📌 When We Need It</h4>
+<ul>
+<li>Complex enterprise queries</li>
+<li>Research assistants</li>
+</ul>
+
+<h4>🌍 Real-Life Example</h4>
+<div class="example-box">
+Query: "CEO of company founded by Elon Musk"
+
+<br><br>
+
+Step 1 → Find company  
+Step 2 → Find CEO
+</div>
+
+<h4>🖼️ Diagram</h4>
+<img src="./asset/img/hybrid_search_Rag.png"><br><br>
+
+
+<h4>📐 Concept</h4>
+<div class="example-box">
+Query → Retrieve → Refine → Retrieve → Generate
+</div>
+
+<h4>💻 Python</h4>
+<pre class="code-box">
+def multi(query):
+    return "step1 result + step2 result"
+</pre>
+
+<div class="insight-box">
+Multi-hop = reasoning layer of RAG.
+</div>
+
+<!-- ================= CACHING ================= -->
+
+<h3 class="section-title">Caching</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Caching reduces latency and cost by storing results of frequent queries. Enterprise systems cache embeddings, retrieval results, 
+and final responses.
+</p>
+
+<pre class="code-box">
+cache={}
+def get(q):
+    if q in cache: return cache[q]
+    cache[q]="result"
+    return cache[q]
+</pre>
+
+<hr>
+
+<!-- ================= VECTOR DB ================= -->
+
+<h3 class="section-title">Vector Database</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Vector databases enable fast similarity search over embeddings. They use ANN algorithms to scale to millions of vectors.
+</p>
+
+<div class="example-box">
+Similarity = cosine(q,d)
+</div>
+
+<hr>
+
+<!-- ================= ORCHESTRATION ================= -->
+
+<h3 class="section-title">Retrieval Orchestration</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Enterprise RAG systems dynamically select retrieval strategies such as hybrid or multi-hop based on query complexity.
+</p>
+
+<pre class="code-box">
+def route(q):
+    return "multi-hop" if "complex" in q else "hybrid"
+</pre>
+
+<hr>
+
+<!-- ================= EVALUATION ================= -->
+
+<h3 class="section-title">Evaluation</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+RAG systems are evaluated using metrics like recall@k, precision, and answer faithfulness.
+</p>
+
+<div class="example-box">
+Recall@k, Precision, Faithfulness
+</div>
+
+<hr>
+
+
+
+<!-- ===================================================== -->
+<!-- QUERY UNDERSTANDING -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Query Understanding Layer</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+In production RAG systems, user queries are rarely clean, structured, or retrieval-friendly. Users often provide incomplete, ambiguous, 
+or conversational inputs that cannot directly map to relevant documents. The Query Understanding Layer solves this problem by transforming 
+raw input into structured, optimized queries for retrieval. This includes classification (simple vs complex queries), rewriting, expansion, 
+and decomposition into sub-queries. This layer is critical because retrieval quality directly depends on query quality. Without it, even 
+the best vector databases and ranking systems fail. Enterprise RAG systems rely heavily on this layer to ensure high recall and relevance 
+across diverse user inputs.
+</p>
+
+<h4 class="sub">❓ Why</h4>
+<ul>
+<li>Improves retrieval accuracy</li>
+<li>Handles ambiguous queries</li>
+<li>Enables multi-hop reasoning</li>
+</ul>
+
+<h4 class="sub">📍 When</h4>
+<ul>
+<li>User queries are unstructured</li>
+<li>Complex enterprise search systems</li>
+</ul>
+
+<h4 class="sub">📐 Concept</h4>
+<div class="example-box">
+Raw Query → Rewrite → Expand → Structured Query
+</div>
+
+<h4 class="sub">💻 Python</h4>
+<pre class="code-box">
+def understand(query):
+    if len(query.split()) < 3:
+        return query + " detailed explanation"
+    return query
+</pre>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- CONTEXT COMPRESSION -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Context Compression</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Context compression is a critical optimization layer in RAG systems that ensures only the most relevant information is passed to the 
+generation model. Retrieved documents are often large and redundant, exceeding token limits and increasing cost. Compression techniques 
+include filtering, summarization, deduplication, and ranking-based pruning. This step ensures that the final context is concise, relevant, 
+and information-dense. Without context compression, systems either exceed token limits or include noisy information, degrading output quality. 
+Enterprise systems use advanced compression strategies to balance accuracy and efficiency.
+</p>
+
+<h4 class="sub">📐 Concept</h4>
+<div class="example-box">
+Docs → Filter → Rank → Compress → Context
+</div>
+
+<h4 class="sub">💻 Python</h4>
+<pre class="code-box">
+def compress(docs):
+    return docs[:2]  # top-k filtering
+</pre>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- ASYNC PIPELINE -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Asynchronous RAG Pipeline</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Latency is a major challenge in production RAG systems. Sequential execution of embedding, retrieval, and generation increases response 
+time. Asynchronous pipelines solve this by parallelizing operations such as retrieval from multiple sources, embedding computation, and 
+ranking. This significantly reduces end-to-end latency. Enterprise systems use async execution frameworks and parallel retrieval strategies 
+to achieve sub-second response times even under high load.
+</p>
+
+<h4 class="sub">📐 Concept</h4>
+<div class="example-box">
+Parallel Retrieval + Ranking → Merge → Generate
+</div>
+
+<h4 class="sub">💻 Python</h4>
+<pre class="code-box">
+import asyncio
+
+async def retrieve():
+    return "doc"
+
+async def pipeline():
+    results = await asyncio.gather(retrieve(), retrieve())
+    return results
+</pre>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- CACHE HIERARCHY -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Cache Hierarchy</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Caching in enterprise RAG systems is not a single layer but a hierarchy. L1 cache stores recent queries, L2 stores embeddings, and L3 
+stores generated responses. This layered approach significantly reduces compute cost and latency. Proper cache invalidation and update 
+strategies are required to maintain consistency with dynamic data sources.
+</p>
+
+<h4 class="sub">📐 Architecture</h4>
+<div class="example-box">
+L1: Query Cache → L2: Embedding Cache → L3: Response Cache
+</div>
+
+<h4 class="sub">💻 Python</h4>
+<pre class="code-box">
+cache = {}
+
+def get(q):
+    return cache.get(q, "miss")
+</pre>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- EVALUATION PIPELINE -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Evaluation Pipeline</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Production RAG systems require continuous evaluation to maintain quality. Offline evaluation uses datasets to measure retrieval and 
+generation performance, while online evaluation uses user feedback and A/B testing. Metrics include recall@k, precision, and answer 
+faithfulness. Without a proper evaluation pipeline, systems degrade over time.
+</p>
+
+<h4 class="sub">📐 Metrics</h4>
+<div class="example-box">
+Recall@k, Precision, Faithfulness
+</div>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- SECURITY -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">RAG Security Layer</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+RAG systems are vulnerable to prompt injection and malicious document retrieval. Attackers can manipulate retrieved content to influence 
+model outputs. Enterprise systems must sanitize inputs, validate sources, and filter outputs to ensure safe operation.
+</p>
+
+<h4 class="sub">📐 Flow</h4>
+<div class="example-box">
+Input → Validate → Retrieve → Filter → Output
+</div>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- FEEDBACK LOOP -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Feedback & Learning Loop</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Enterprise RAG systems continuously improve using feedback loops. User interactions, clicks, and corrections are stored and used to 
+refine retrieval ranking and query understanding. This transforms static systems into adaptive systems that improve over time.
+</p>
+
+<h4 class="sub">📐 Concept</h4>
+<div class="example-box">
+User Feedback → Update Ranking → Improve Retrieval
+</div>
+
+<hr>
+
+<div class="insight-box">
+A production RAG system is not a pipeline — it is a continuously learning retrieval ecosystem.
+</div>
+
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- API LAYER -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">RAG API Layer</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+The API layer exposes RAG capabilities to applications via stable, versioned endpoints. It abstracts the internal pipeline 
+(query understanding, retrieval, compression, and generation) and provides consistent request/response contracts. At scale, 
+this layer must support authentication, rate limiting, streaming responses, and observability. Designing clean APIs is critical 
+for developer adoption and backward compatibility. Enterprises typically provide endpoints for query, ingestion, and admin 
+operations, along with SDKs. This layer is also where request validation and routing decisions begin.
+</p>
+
+<h4 class="sub">❓ Why</h4>
+<ul>
+<li>Standardizes access to RAG capabilities</li>
+<li>Enables integration with apps and services</li>
+<li>Supports auth, rate limits, and monitoring</li>
+</ul>
+
+<h4 class="sub">📍 When</h4>
+<ul>
+<li>Building internal platforms or public APIs</li>
+<li>Serving multiple clients or teams</li>
+</ul>
+
+<h4 class="sub">📐 Contract</h4>
+<div class="example-box">
+POST /rag/query { query, tenant_id, filters } → { answer, sources, latency }
+</div>
+
+<h4 class="sub">💻 Python (FastAPI)</h4>
+<pre class="code-box">
+from fastapi import FastAPI
+app = FastAPI()
+
+@app.post("/rag/query")
+def query(payload: dict):
+    q = payload["query"]
+    return {"answer": "generated answer", "sources": []}
+</pre>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- DATA INGESTION -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Data Ingestion Pipeline</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+A production RAG system continuously ingests data from documents, databases, and APIs. The ingestion pipeline handles parsing, 
+cleaning, chunking, embedding, and indexing. It must be robust to varied formats (PDF, HTML, CSV), support incremental updates, 
+and maintain consistency with the vector index. Scheduling (batch vs streaming), deduplication, and metadata extraction are key. 
+Without a reliable ingestion pipeline, retrieval quality degrades quickly as data becomes stale or inconsistent.
+</p>
+
+<h4 class="sub">❓ Why</h4>
+<ul>
+<li>Keeps knowledge base up to date</li>
+<li>Improves retrieval coverage</li>
+<li>Supports heterogeneous data sources</li>
+</ul>
+
+<h4 class="sub">📍 When</h4>
+<ul>
+<li>Dynamic or frequently updated data</li>
+<li>Enterprise document repositories</li>
+</ul>
+
+<h4 class="sub">📐 Flow</h4>
+<div class="example-box">
+Source → Parse → Chunk → Embed → Index
+</div>
+
+<h4 class="sub">💻 Python</h4>
+<pre class="code-box">
+def ingest(doc):
+    chunks = [doc[i:i+200] for i in range(0, len(doc), 200)]
+    embeddings = [len(c) for c in chunks]  # placeholder
+    return list(zip(chunks, embeddings))
+</pre>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- MULTI-TENANCY -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Multi-Tenant Architecture</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+RAG-as-a-Service must isolate data across tenants (customers, teams, or apps). Multi-tenancy ensures each tenant’s data, indexes, 
+and queries are logically or physically separated. Approaches include namespace-based isolation within a shared vector DB or 
+dedicated indexes per tenant. Access control, encryption, and quota enforcement are essential. Proper multi-tenancy design 
+prevents data leakage and enables scalable growth without duplicating infrastructure unnecessarily.
+</p>
+
+<h4 class="sub">❓ Why</h4>
+<ul>
+<li>Data isolation and security</li>
+<li>Scalability across customers</li>
+<li>Cost-efficient shared infrastructure</li>
+</ul>
+
+<h4 class="sub">📍 When</h4>
+<ul>
+<li>SaaS platforms</li>
+<li>Internal multi-team deployments</li>
+</ul>
+
+<h4 class="sub">📐 Model</h4>
+<div class="example-box">
+Tenant → Namespace → Index → Retrieval
+</div>
+
+<h4 class="sub">💻 Python</h4>
+<pre class="code-box">
+store = {}
+
+def index(tenant, doc):
+    store.setdefault(tenant, []).append(doc)
+</pre>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- COST CONTROL -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Cost Control & Token Budgeting</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+RAG systems incur costs from embedding, retrieval, and generation. Without controls, expenses scale with usage. Cost management 
+includes token budgeting, adaptive context sizing, caching, and routing to smaller models when possible. Systems often enforce 
+per-request or per-tenant budgets, trimming context or limiting top-k retrieval dynamically. Observability feeds into cost 
+dashboards to optimize spend without sacrificing quality.
+</p>
+
+<h4 class="sub">❓ Why</h4>
+<ul>
+<li>Prevents runaway costs</li>
+<li>Optimizes resource usage</li>
+<li>Supports pricing models</li>
+</ul>
+
+<h4 class="sub">📐 Formula</h4>
+<div class="example-box">
+Cost ∝ (Tokens_in + Tokens_out) × Requests
+</div>
+
+<h4 class="sub">💻 Python</h4>
+<pre class="code-box">
+def budget(tokens_in, tokens_out, price=1e-5):
+    return (tokens_in + tokens_out) * price
+</pre>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- RATE LIMITING -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Rate Limiting & Quotas</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Rate limiting protects the system from abuse and ensures fair usage across tenants. Quotas can be defined per second (RPS), 
+per minute, or per day, along with token limits. Implementations include token buckets and leaky buckets. Combined with 
+authentication, rate limits maintain system stability under load and enforce subscription tiers in SaaS products.
+</p>
+
+<h4 class="sub">📐 Model</h4>
+<div class="example-box">
+Allowed Requests ≤ Rate × Time
+</div>
+
+<h4 class="sub">💻 Python</h4>
+<pre class="code-box">
+import time
+
+last = {}
+
+def allow(user, interval=1):
+    now = time.time()
+    if user not in last or now - last[user] > interval:
+        last[user] = now
+        return True
+    return False
+</pre>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- STREAMING API -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Streaming Responses</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Streaming returns tokens incrementally to reduce perceived latency and improve UX. For RAG, streaming can begin after initial 
+context is ready, sending partial outputs while generation continues. Implementations use server-sent events (SSE) or WebSockets. 
+Care must be taken to handle cancellations, timeouts, and backpressure.
+</p>
+
+<h4 class="sub">📐 Flow</h4>
+<div class="example-box">
+Generate → Token₁ → Token₂ → ... → Client
+</div>
+
+<h4 class="sub">💻 Python (SSE Concept)</h4>
+<pre class="code-box">
+def stream(tokens):
+    for t in tokens:
+        yield t
+</pre>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- OBSERVABILITY -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">Observability & Tracing</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+Observability provides visibility into each stage of the RAG pipeline: query understanding, retrieval latency, hit rates, 
+context size, and generation time. Distributed tracing ties these stages into a single request timeline. Metrics and logs 
+enable debugging, capacity planning, and cost optimization. Without observability, diagnosing failures or regressions is 
+extremely difficult.
+</p>
+
+<h4 class="sub">📐 Metrics</h4>
+<div class="example-box">
+Latency, Recall@k, Cache Hit Rate, Tokens/Req
+</div>
+
+<h4 class="sub">💻 Python</h4>
+<pre class="code-box">
+import time
+t0 = time.time()
+# run pipeline
+print("latency:", time.time() - t0)
+</pre>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- CI/CD & VERSIONING -->
+<!-- ===================================================== -->
+
+<h3 class="section-title">CI/CD & Versioning</h3>
+
+<h4 class="sub">📖 Introduction</h4>
+<p>
+RAG systems evolve: embeddings, indexes, prompts, and routing logic change over time. CI/CD pipelines automate testing and 
+deployment of these components. Versioning ensures safe rollbacks and A/B testing between configurations (e.g., different 
+chunking or ranking strategies). Blue/green deployments and canary releases minimize risk.
+</p>
+
+<h4 class="sub">📐 Concept</h4>
+<div class="example-box">
+v1 → v2 (A/B Test) → Promote
+</div>
+
+<h4 class="sub">💻 Python</h4>
+<pre class="code-box">
+def route(version="v1"):
+    return "new" if version=="v2" else "old"
+</pre>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- FINAL INSIGHT -->
+<!-- ===================================================== -->
+
+<div class="insight-box">
+RAG at scale is a product: APIs + data pipelines + multi-tenancy + cost control — not just retrieval and generation.
+</div>
+
+<hr>
+
+</div>
+
+<!-- ================= CTA ================= -->
+<div class="start-btn">
+    <button onclick="openPage('index.html')">Home Page →</button>
+</div>
+
+<script>
+function openPage(page){
+    window.location.href = page;
+}
+</script>
+</body>
+</html>
